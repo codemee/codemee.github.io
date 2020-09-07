@@ -43,7 +43,7 @@ async function loadTransferModel(modelName, modelActivation) {
 async function loadModelFile(url, json) {
   const modelFileResponse = await fetch(url);
 
-  console.log("Done fetching file");
+  console.log("Done fetching file:" +url);
 
   if (json) {
     return await modelFileResponse.json();
