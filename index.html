@@ -356,7 +356,6 @@
                 } else {
                   var name = personList[data[0].candidates[0].personId];
                   if (name) {
-                    $.get("http://192.168.100.117:8899/cmd?led=on");
                     speakMsg(name + "您好, 歡迎回來", "success");
                     //setTimeout(function(){ $.get("/close"); }, 5000);
 
