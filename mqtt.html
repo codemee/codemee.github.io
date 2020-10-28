@@ -27,11 +27,12 @@ function init() {
     document.getElementById("mqtt_pub").addEventListener('click', publish_message);
     // 建立 MQTT 用戶端實體. 你必須正確寫上你設置的埠號.
     // ClientId 可以自行指定，提供 MQTT broker 認證用
-    client = new Paho.MQTT.Client("ws://io.adafruit.com:443/", "myClientId");
+    client = new Paho.MQTT.Client("io.adafruit.com", 443, "/", "xxxxxClientId");
 
     // 連接 MQTT broker
     client.connect({
         onSuccess:onConnect,
+        useSSL: true,
         userName:"mee_box",
         password:"aio_KnhD33yGTDN4z7d3Ci6AnZfAsINl"
     });
