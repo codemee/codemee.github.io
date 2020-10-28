@@ -29,9 +29,6 @@ function init() {
     // ClientId 可以自行指定，提供 MQTT broker 認證用
     client = new Paho.MQTT.Client("ws://io.adafruit.com:443/", "myClientId");
 
-    // 指定收到訊息時的處理動作
-    client.onMessageArrived = onMessageArrived;
-
     // 連接 MQTT broker
     client.connect({
         onSuccess:onConnect,
