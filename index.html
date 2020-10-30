@@ -9,6 +9,7 @@
   <script>
     var apiLocation = "westcentralus"; //刪除 X, 在引號中間輸入端點
     var apiKey = "39bd5b32891c44809f1669355661e617"; //刪除 X, 在引號中間輸入金鑰
+    var keys;
   </script>
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.css" rel="stylesheet">
@@ -360,7 +361,7 @@
                     //setTimeout(function(){ $.get("/close"); }, 5000);
 
                     $.ajax({
-                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=aio_AedK97HEj2P4S5u1MIk1clqMUXk9",
+                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=" + keys["AIO"],
                         type: "POST",
                         data: {
                           "value":100
@@ -372,7 +373,7 @@
                           type: 'info'
                         }).show();
                         $.ajax({
-                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=aio_AedK97HEj2P4S5u1MIk1clqMUXk9",
+                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=" + keys["AIO"],
                         type: "POST",
                         data: {
                           "value":0
@@ -630,6 +631,13 @@
       });
 
       checkGroup(groupID);
+
+      $.get("https://codemee.github.io/key.txt", function(data){
+        console.log("data:");
+        console.log(data);
+        keys = $.parseJSON(data);
+        console.log(keys);
+      });
     });
   </script>
 </body>
