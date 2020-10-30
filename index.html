@@ -9,7 +9,7 @@
   <script>
     var apiLocation = "westcentralus"; //刪除 X, 在引號中間輸入端點
     var apiKey = "39bd5b32891c44809f1669355661e617"; //刪除 X, 在引號中間輸入金鑰
-    var keys;
+    var keys = {};
   </script>
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.css" rel="stylesheet">
@@ -632,12 +632,9 @@
 
       checkGroup(groupID);
 
-      $.get("https://codemee.github.io/key.txt", function(data){
-        console.log("data:");
-        console.log(data);
-        keys = $.parseJSON(data);
-        console.log(keys);
-      });
+      let urlParams = new URLSearchParams(window.location.search);
+      keys["AIO"] = urlParams.get("aio_key");
+      console.log("data:" + keys["AIO"]);
     });
   </script>
 </body>
