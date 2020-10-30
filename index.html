@@ -360,7 +360,7 @@
                     //setTimeout(function(){ $.get("/close"); }, 5000);
 
                     $.ajax({
-                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=aio_mGST16JnrbbPkwZjUgUVltcPJiUR",
+                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=aio_AedK97HEj2P4S5u1MIk1clqMUXk9",
                         type: "POST",
                         data: {
                           "value":100
@@ -371,6 +371,25 @@
                           text: '發出通知',
                           type: 'info'
                         }).show();
+                        $.ajax({
+                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=aio_AedK97HEj2P4S5u1MIk1clqMUXk9",
+                        type: "POST",
+                        data: {
+                          "value":0
+                        },
+                      })
+                      .done(function (data) {
+                        new Noty({
+                          text: '復原狀態',
+                          type: 'info'
+                        }).show();
+                      })
+                      .fail(function () {
+                        new Noty({
+                          text: '無法復原狀態',
+                          type: 'error'
+                        }).show();
+                      });
                       })
                       .fail(function () {
                         new Noty({
