@@ -7,7 +7,9 @@
   <title>AI 刷臉智慧門鎖</title>
 
   <script>
+    var aio_n; // Adafruit user name
     var aio_k; // Adafruit IO Key
+    var aio_f; // Adafruit feed name
     var az_k;  // Azure Key
     var az_ep; // Azure Endpoint
   </script>
@@ -361,7 +363,7 @@
                     //setTimeout(function(){ $.get("/close"); }, 5000);
 
                     $.ajax({
-                        url: "https://io.adafruit.com/api/v2/mee_box/feeds/face/data?X-AIO-Key=" + aio_k,
+                        url: "https://io.adafruit.com/api/v2/" + aio_n + "/feeds/" + aio_f + "/data?X-AIO-Key=" + aio_k,
                         type: "POST",
                         data: {
                           "value":100
