@@ -596,6 +596,17 @@
     }
 
     $(document).ready(function () {
+      let urlParams = new URLSearchParams(window.location.search);
+      aio_k = urlParams.get("aio_k");
+      console.log("AIO Key:" + aio_k);
+      aio_n = urlParams.get("aio_n");
+      console.log("AIO user name:" + aio_n);
+      aio_f = urlParams.get("aio_f");
+      console.log("AIO feed name:" + aio_f);
+      az_k = urlParams.get("az_k");
+      console.log("Azure Key:" + az_k);
+      az_ep = urlParams.get("az_ep");
+      console.log("Azure Endpoint:" + az_ep);
       Noty.overrideDefaults({
         layout: 'topRight',
         timeout: 3000,
@@ -614,14 +625,6 @@
       });
 
       checkGroup(groupID);
-
-      let urlParams = new URLSearchParams(window.location.search);
-      aio_k = urlParams.get("aio_k");
-      console.log("AIO Key:" + aio_k);
-      az_k = urlParams.get("az_k");
-      console.log("Azure Key:" + az_k);
-      az_ep = urlParams.get("az_ep");
-      console.log("Azure Endpoint:" + az_ep);
     });
   </script>
 </body>
