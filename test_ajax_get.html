@@ -16,6 +16,7 @@ xhttp.onreadystatechange = function() {
   }
 };
 function loadDoc() {
+  xhttp.withCredentials = true
   xhttp.open("GET", "https://things.ubidots.com/api/v1.6/devices/esp32/temp/lv", true);
   xhttp.setRequestHeader("Content-type", "application/json");
   xhttp.setRequestHeader("X-Auth-Token", "BBFF-L1sB1D5qvBFkstRDov8UM7c7BiLcWC");
