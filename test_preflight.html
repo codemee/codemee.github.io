@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>The XMLHttpRequest Object</h2>
+
+<button type="button" onclick="loadDoc()">Get POST response</button>
+
+<p id="demo"></p>
+ 
+<script>
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+  if (this.readyState == 4 && this.status == 200) {
+    document.getElementById("demo").innerHTML = "Response:" + this.responseText;
+  }
+};
+function loadDoc() {
+  xhttp.open("POST", "http://iot.cht.com.tw/iot/v1/device/22581411078/rawdata", true);
+  xhttp.setRequestHeader("Content-type", "application/json");
+  xhttp.setRequestHeader("CK", "DKH0GYWY5451FWCBSY");
+  xhttp.send('[{"id":"qaq", "value":["20"]}]');
+}
+</script>
+
+</body>
+</html>
