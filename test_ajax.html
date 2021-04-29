@@ -4,7 +4,7 @@
 
 <h2>The XMLHttpRequest Object</h2>
 
-<button type="button" onclick="remoteLED()">LED ON</button>
+<button type="button" onclick="remoteLED()">On/Off</button>
 
 <p id="demo"></p>
  
@@ -15,8 +15,10 @@ xhttp.onreadystatechange = function() {
     document.getElementById("demo").innerHTML = "Response:" + this.responseText;
   }
 };
-function remoteLED() {
-  xhttp.open("GET", "http://192.168.100.26:8899/cmd?led=on", true);
+function remotrLED() {
+  xhttp.open("GET", "http://192.168.100.26/cmd?led=on", true);
+  // xhttp.setRequestHeader("Content-type", "application/json");
+  // xhttp.setRequestHeader("CK", "DKH0GYWY5451FWCBSY");
   xhttp.send();
 }
 </script>
