@@ -10,11 +10,11 @@
  
 <script>
 var xhttp = new XMLHttpRequest();
-xhttp.onreadystatechange = function() {
-  if (this.readyState == 4 && this.status == 200) {
-    document.getElementById("demo").innerHTML = "Response:" + this.responseText;
-  }
-};
+// xhttp.onreadystatechange = function() {
+//   if (this.readyState == 4 && this.status == 200) {
+//     document.getElementById("demo").innerHTML = "Response:" + this.responseText;
+//   }
+// };
 function remoteLED() {
   xhttp.open("GET", "http://192.168.100.26/cmd?led=on", true);
   // xhttp.setRequestHeader("Content-type", "application/json");
