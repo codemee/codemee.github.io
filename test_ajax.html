@@ -15,7 +15,7 @@ xhttp.onreadystatechange = function() {
     document.getElementById("demo").innerHTML = "Response:" + this.responseText;
   }
 };
-function remotrLED() {
+function remoteLED() {
   xhttp.open("GET", "http://192.168.100.26/cmd?led=on", true);
   // xhttp.setRequestHeader("Content-type", "application/json");
   // xhttp.setRequestHeader("CK", "DKH0GYWY5451FWCBSY");
