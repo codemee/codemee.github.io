@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Test JSONP for Blynk</h2>
+
+<button type="button" onclick="clickButton()">Request data</button>
+
+<p id="demo"></p>
+ 
+<script>
+var led = 0;
+function clickButton() {
+  var s = document.createElement("script");
+  s.src = "http://blynk-cloud.com/XOk3jS0oh86uXS6uWRHQpW8oohydgwI_/update/V3?value=" + led;
+  document.body.appendChild(s);
+  led = 1 - led;
+}
+</script>
+
+</body>
+</html>
