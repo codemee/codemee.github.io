@@ -15,12 +15,11 @@ xhttp.onreadystatechange = function() {
     document.getElementById("demo").innerHTML = "Response:" + this.responseText;
   }
 };
+var led = 0;
 function loadDoc() {
-  xhttp.withCredentials = true
-  xhttp.open("GET", "https://things.ubidots.com/api/v1.6/devices/esp32/temp/lv", true);
-  xhttp.setRequestHeader("Content-type", "application/json");
-  xhttp.setRequestHeader("X-Auth-Token", "BBFF-L1sB1D5qvBFkstRDov8UM7c7BiLcWC");
+  xhttp.open("GET", "https://script.google.com/macros/s/AKfycbzYBU3YK1ypHKhnHhlX8vbmaAXOe2MiQXlpb5GbUVCI9hTSPIyzyWNAcbjKSKqnCLE/exec?ch=temp&act=set&val=" + led, true);
   xhttp.send();
+  led = 1 - led;
 }
 </script>
 
