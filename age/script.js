@@ -83,10 +83,10 @@ async function startVideo(){
   await navigator.mediaDevices.getUserMedia({video: {}},)   
     .then(function(stream){
       console.log("setting")
-      video1.setAttribute("autoplay", "true");
-      video1.setAttribute("playsinline", "true");
-      video1.setAttribute("muted", "true");
-      video1.setAttribute("loop", "true");
+      // video1.setAttribute("autoplay", "true");
+      // video1.setAttribute("playsinline", "true");
+      // video1.setAttribute("muted", "true");
+      // video1.setAttribute("loop", "true");
       //video1.setAttribute("controls", "true");
       video1.srcObject = stream;
     })
