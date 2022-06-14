@@ -127,10 +127,10 @@ let init = false;
 
 function changeCanvasSize() {
   bly_token.style.width = (video1.offsetWidth).toString() + "px"
-  bly_token.style.height = video1.offsetHeight.toString() / 8 + "px"
+  // bly_token.style.height = video1.offsetHeight.toString() / 8 + "px"
   bly_pin.style.width = (video1.offsetWidth).toString() + "px"
-  bly_pin.style.height = video1.offsetHeight.toString() / 8 + "px"
-  idn.style.height = video1.offsetHeight.toString() / 8 + "px"
+  // bly_pin.style.height = video1.offsetHeight.toString() / 8 + "px"
+  // idn.style.height = video1.offsetHeight.toString() / 8 + "px"
   // idn.style.fontSize = video1.offsetHeight.toString() / 15 + "px"
   canvas.style.width = video1.offsetWidth.toString() + "px"
   canvas.style.height = video1.offsetHeight.toString() + "px"
