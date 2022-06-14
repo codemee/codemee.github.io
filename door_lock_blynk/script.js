@@ -13,13 +13,13 @@ const bly_pin = document.getElementById('bly_pin')
 // 讓輸入框圓角一點  需要 jquery-ui.min.js 和 jquery-ui.min.css
 $('input:text').addClass("ui-widget ui-widget-content ui-corner-all ui-textfield");
 
-setInterval(async () => {
+// setInterval(async () => {
   // inputtext.style.width = video1.offsetWidth.toString()+"px"
   // inputtext.style.height = video1.offsetHeight.toString()/8+"px"
   // idn.style.height = video1.offsetHeight.toString()/8+"px"
   // idn.style.fontSize = video1.offsetHeight.toString()/15+"px"
-  checkCookie()
-}, 100)
+//   checkCookie()
+// }, 100)
 
 // 儲存 cookie 的值(cookie的名字、cookie的值、儲存的天數)
 function setCookie(cname, cvalue, exdays) {
