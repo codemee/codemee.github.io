@@ -25,7 +25,7 @@
       position: absolute;
     }
 
-    /* 顯示文字 */
+    /* 顯示文字
     #connDiv{
       display:none;
       font-family: "微軟正黑體";
@@ -35,18 +35,18 @@
       text-shadow: -1px -1px 0  rgb(255, 255, 255);
       margin: 0;
       padding: 20px;
-    }
+    } */
 
     #inputVideo{
-      max-height: 80%;  
+      max-height: 70%;  
       max-width: 80%;
     }
 
-    #connBtnImg{
+    /* #connBtnImg{
       position:relative;
       width: 10vw;       
       height: 10vh;  
-    }
+    } */
 
     #mask{
       width: 100vw;
@@ -66,23 +66,23 @@
 
     #identify{
       font-family: "微軟正黑體";
-      font-size: 4vmin;
-      margin-top: 2vh;
-      margin-bottom: 2vh;
-      height: 6vh;
+      font-size: 3vmin;
+      margin-top: 1vh;
+      margin-bottom: 1vh;
+      height: 5vh;
     }
 
-    #inputtext{
-      font-size: 4vmin;
-      height: 5vh;
+    #bly_token, #bly_pin {
+      font-size: 3vmin;
+      height: 4vh;
       max-width: 90vw;
-      margin-top: 2vh;
+      margin-top: 1vh;
     }
 
     #te{
       font-family: "微軟正黑體";
       font-weight:bold;
-      font-size: 8vmin;
+      font-size: 6vmin;
       color: rgb(255, 255, 255);
       text-shadow: -1px -1px 0 rgb(0, 0, 0);
       /*margin: 0;
@@ -99,24 +99,21 @@
 </head>
 
 <script defer  src="face-api.min.js"></script>
-<script defer  src="script.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
 <link rel="stylesheet" href="jquery-ui.min.css" />
 <script src="jquery-ui.min.js"></script>
-
-
 <body>
   <!--   -->
   <div id="mask"></div>
-  <img  id="loadImg"src="loadModel.gif">
+  <img  id="loadImg" src="loadModel.gif">
   <p id="te">智慧門鎖</p>
   <video id="inputVideo" autoplay muted playsinline></video>
-  <input id="inputtext" type="text" name="欄位名稱" placeholder="請輸入金鑰, 並按下辨識按鈕來傳送資料">
-  <button id="identify" >辨識按鈕</button>
+  <button id="identify">辨識按鈕</button>
+  <input id="bly_token" type="text" name="bly_token" placeholder="請輸入 Blynk 權杖">
+  <input id="bly_pin" type="text" name="bly_pin" placeholder="請輸入 Blynk 腳位" value="v0">
 </body>
-
-
+<script defer  src="script.js"></script>
 </html>
