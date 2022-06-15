@@ -101,6 +101,7 @@ async function initRecognizeFaces() {
   loadImg.style.display = "none"
   changeCanvasSize()
   window.addEventListener("resize", changeCanvasSize);
+  await faceapi.detectAllFaces(video1).withFaceExpressions()
   console.log("初始化成功")
 }
 
@@ -149,27 +150,6 @@ async function recognizeFaces() {
       exprIdx[exprMax],
     );
   }
-
-
-  // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-  // results = resizedDetections.map((d) => {
-  //   return faceMatcher.findBestMatch(d.descriptor)
-  // })
-
-  // results.forEach((result, i) => {
-  //   console.log(results[i]["label"])     // 顯示所有偵測到的名稱
-  //   lab = parseFloat(labels.indexOf(results[i]["label"]))
-  //   dis = parseFloat(results[i]["distance"])
-  //   console.log(lab + dis)
-
-
-  //   const box = resizedDetections[i].detection.box
-  //   const drawBox = new faceapi.draw.DrawBox(box, { label: result })
-  //   drawBox.draw(canvas)
-  // })
-  // setTimeout(async () => {
-  //   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-  // }, 1000)
 }
 
 $('#identify').click((e) => {
