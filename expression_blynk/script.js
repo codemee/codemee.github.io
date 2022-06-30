@@ -90,7 +90,7 @@ function changeCanvasSize() {
 }
 
 async function initRecognizeFaces() {
-  console.log(init)
+  // console.log(init)
   // labeledDescriptors = await loadLabel()
   // 描述標籤
   // console.log(labeledDescriptors)
@@ -118,10 +118,9 @@ const exprIdx = {
 async function recognizeFaces() {
   detections = await faceapi.detectAllFaces(video1).withFaceExpressions()
   resizedDetections = faceapi.resizeResults(detections, displaySize)
-  // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
   faceapi.draw.drawDetections(canvas, resizedDetections)
-  // faceapi.drawFaceExpressions(resizedDetections);
-  console.log(resizedDetections);
+  // faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+  // console.log(faceapi);
   if (resizedDetections.length > 0) {
     let exprMax = "";
     let pos = 0;
@@ -131,7 +130,7 @@ async function recognizeFaces() {
         exprMax = expr;
       }
     }
-    console.log(exprMax, pos);
+    // console.log(exprMax, pos);
     new faceapi.draw.DrawTextField(
       [
       `${exprMax} (${parseInt(pos * 100, 10)})`
@@ -156,42 +155,6 @@ $('#identify').click((e) => {
   console.log("辨識")
   recognizeFaces();
 });
-
-// function loadLabel() {
-//   let labels_len = labels.length;
-//   let succ = true;
-//   return Promise.all(
-//     labels.map(async (label) => {
-//       console.log(label)
-//       const descriptions = []
-//       for (let i = 1; i <= 3; i++) {
-//         try {
-//           img = await faceapi.fetchImage(`images/${label}/${i}.jpg`)
-//         }
-//         catch (e) {
-//           console.log("換PNG啦")
-//           try {
-//             img = await faceapi.fetchImage(`images/${label}/${i}.png`)
-//           }
-//           catch (err) {
-//             console.log("錯誤啊!!!")
-//             alert("名稱有誤, 請重新確認!!");
-//             // 重新載入網頁, 讓使用者可重新輸入人名
-//             window.location.reload()
-//           }
-//         }
-//         const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
-//         descriptions.push(detections.descriptor)
-//       }
-//       labels_len--
-//       if(labels_len == 0) {
-//         // 成功載入所有照片, 表示輸入的人名正確, 儲存到 cookie 中
-//         setCookie("labelStr", labelStr, 30);
-//       }
-//       return new faceapi.LabeledFaceDescriptors(label, descriptions)
-//     })
-//   )
-// }
 
 // 取得元素位置
 function getPosition(element) {
