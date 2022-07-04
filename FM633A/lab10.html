@@ -293,7 +293,6 @@ $(document).ready(function () {
             }
             if (effect_index != pred_result_index && pred_result_index != 0){
                 effect_index = pred_result_index;
-                console.log(classLabels[effect_index], pred_result_index);
                 labelContainer.innerHTML = classLabels[effect_index];
                 $.ajax({
                     url: "https://io.adafruit.com/api/v2/" + aio_n + "/feeds/" + aio_f + "/data?X-AIO-Key=" + aio_k,
