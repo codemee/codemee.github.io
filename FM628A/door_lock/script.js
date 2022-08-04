@@ -118,19 +118,22 @@ async function recognizeFaces() {
     dis = parseFloat(results[i]["distance"])
     console.log(lab + dis)
 
-    $.get(
-      'https://blynk.cloud/external/api/update?token=' +
-      bly_token.value +
-      '&' +
-      bly_pin.value + '=0',
-      function (data) {
-        setTimeout(function () {
-          $.get('https://blynk.cloud/external/api/update?token=' +
-            bly_token.value +
-            '&' +
-            bly_pin.value + '=1')
-        }, 5000);
-      });
+    if(lab != "unknown" && dis < 0.4) {
+      $.get(
+        'https://blynk.cloud/external/api/update?token=' +
+        bly_token.value +
+        '&' +
+        bly_pin.value + '=0',
+        function (data) {
+          setTimeout(function () {
+            $.get('https://blynk.cloud/external/api/update?token=' +
+              bly_token.value +
+              '&' +
+              bly_pin.value + '=1')
+          }, 5000);
+        }
+      );
+    }
 
     const box = resizedDetections[i].detection.box
     const drawBox = new faceapi.draw.DrawBox(box, { label: result })
