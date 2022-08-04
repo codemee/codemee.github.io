@@ -25,7 +25,7 @@ const bly_pin = document.getElementById('bly_pin')
 
 // 取得人名, 要與 images 下的資料夾名稱相同 
 let labelStr = getCookie("labelStr");
-if(labelStr == "") labelStr = "Teddy,Chuan";
+if (labelStr == "") labelStr = "Teddy,Chuan";
 labelStr = prompt("請輸入名稱並以逗號隔開人名:", labelStr);
 let labels = labelStr.toString().split(",")
 
@@ -42,8 +42,8 @@ bly_pin.addEventListener("blur", saveCookie);
 // 從 cookie 取得之前輸入的權杖與虛擬腳位
 let key = getCookie("bly_key");
 let pin = getCookie("bly_pin");
-if(key != "") bly_token.value = key;
-if(pin != "") bly_pin.value = pin;
+if (key != "") bly_token.value = key;
+if (pin != "") bly_pin.value = pin;
 
 // 讓輸入框圓角一點  需要 jquery-ui.min.js 和 jquery-ui.min.css
 $('input:text').addClass("ui-widget ui-widget-content ui-corner-all ui-textfield");
@@ -60,8 +60,10 @@ Promise.all([
 ]).then(startVideo)
 
 async function startVideo() {
-  // await navigator.mediaDevices.getUserMedia({ video: {} },)
-  await navigator.mediaDevices.getUserMedia({ video: {facingMode: { exact: "environment" }} },)
+  await navigator.mediaDevices.getUserMedia({ video: {} },) // 前鏡頭
+  // await navigator.mediaDevices.getUserMedia({ 
+  //   video: { facingMode: { exact: "environment" } } },  // 後鏡頭
+  //   )
     .then(function (stream) {
       video1.srcObject = stream;
     })
@@ -90,18 +92,18 @@ function changeCanvasSize() {
 }
 
 async function initRecognizeFaces() {
-    console.log(init)
-    labeledDescriptors = await loadLabel()
-    // 描述標籤
-    console.log(labeledDescriptors)
-    faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.7)
-    canvas = faceapi.createCanvasFromMedia(video1)
-    document.body.append(canvas)
-    mask.style.display = "none"
-    loadImg.style.display = "none"
-    changeCanvasSize()
-    window.addEventListener("resize", changeCanvasSize);
-    console.log("初始化成功")
+  console.log(init)
+  labeledDescriptors = await loadLabel()
+  // 描述標籤
+  console.log(labeledDescriptors)
+  faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.7)
+  canvas = faceapi.createCanvasFromMedia(video1)
+  document.body.append(canvas)
+  mask.style.display = "none"
+  loadImg.style.display = "none"
+  changeCanvasSize()
+  window.addEventListener("resize", changeCanvasSize);
+  console.log("初始化成功")
 }
 
 async function recognizeFaces() {
@@ -118,7 +120,7 @@ async function recognizeFaces() {
     dis = parseFloat(results[i]["distance"])
     console.log(lab + dis)
 
-    if(lab != "unknown" && dis < 0.4) {
+    if (lab != "unknown" && dis < 0.4) {
       $.get(
         'https://blynk.cloud/external/api/update?token=' +
         bly_token.value +
@@ -176,7 +178,7 @@ function loadLabel() {
         descriptions.push(detections.descriptor)
       }
       labels_len--
-      if(labels_len == 0) {
+      if (labels_len == 0) {
         // 成功載入所有照片, 表示輸入的人名正確, 儲存到 cookie 中
         setCookie("labelStr", labelStr, 30);
       }
