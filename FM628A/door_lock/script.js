@@ -60,7 +60,8 @@ Promise.all([
 ]).then(startVideo)
 
 async function startVideo() {
-  await navigator.mediaDevices.getUserMedia({ video: {} },)
+  // await navigator.mediaDevices.getUserMedia({ video: {} },)
+  await navigator.mediaDevices.getUserMedia({ video: {facingMode: { exact: "environment" }} },)
     .then(function (stream) {
       video1.srcObject = stream;
     })
