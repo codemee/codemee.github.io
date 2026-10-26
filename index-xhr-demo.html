@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>The XMLHttpRequest Object</h2>
+
+<button type="button" onclick="loadDoc()">Get POST response</button>
+
+<p id="demo"></p>
+ 
+<script>
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+  if (this.readyState == 4 && this.status == 200) {
+    document.getElementById("demo").innerHTML = "Response:" + this.responseText;
+  }
+};
+var led = 0;
+function loadDoc() {
+  xhttp.open("GET", "https://script.google.com/macros/s/AKfycbzYBU3YK1ypHKhnHhlX8vbmaAXOe2MiQXlpb5GbUVCI9hTSPIyzyWNAcbjKSKqnCLE/exec?ch=temp&act=set&val=" + led, true);
+  xhttp.send();
+  led = 1 - led;
+}
+</script>
+
+</body>
+</html>
