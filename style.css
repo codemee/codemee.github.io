@@ -71,10 +71,7 @@ h3 { margin: 0; }
 .tool-list { border-top: 1px solid var(--line); }
 .tool { display: grid; grid-template-columns: 68px 160px 1fr 24px; gap: 24px; align-items: center; border-bottom: 1px solid var(--line); padding: 26px 12px; transition: background .18s; }
 .tool:hover { background: var(--surface); }
-.tool { position: relative; }
-.tool-link::after { content: ""; position: absolute; inset: 0; }
-.tool-link:focus-visible::after { outline: 3px solid var(--orange); outline-offset: 3px; }
-.tool-inspiration a { position: relative; z-index: 1; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.tool-inspiration a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .tool-inspiration a:hover { color: var(--orange); }
 .tool-icon { width: 64px; height: 64px; background: #fff; border: 1px solid #e2e1e7; border-radius: 14px; display: grid; place-items: center; }
 .tool-icon img { width: 46px; height: 46px; object-fit: contain; }
@@ -84,7 +81,8 @@ h3 { margin: 0; }
 .tool strong { color: var(--text); font-weight: 600; }
 .tool-detail { display: block; margin-top: 5px; font-size: 12px; }
 .platform-note { color: var(--muted); font-size: 12px; line-height: 1.9; margin: -10px 0 22px; }
-.tool-arrow { font-size: 23px; color: var(--accent); }
+.tool-arrow { display: grid; place-items: center; min-height: 44px; font-size: 23px; color: var(--accent); }
+.tool-icon:hover, .tool-link:hover, .tool-arrow:hover { color: var(--orange); }
 .all-projects { margin: 26px 0 0; }
 .tool-name > .platform { display: block; color: var(--accent); font-family: Consolas, monospace; font-size: 10px; margin-top: 9px; }
 .tool-name > .tool-inspiration { display: block; font-size: 11px; line-height: 1.7; margin-top: 7px; }
