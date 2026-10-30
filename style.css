@@ -86,6 +86,8 @@ h3 { margin: 0; }
 .all-projects { margin: 26px 0 0; }
 .tool-name > .platform { display: block; color: var(--accent); font-family: Consolas, monospace; font-size: 10px; margin-top: 9px; }
 .tool-name > .tool-inspiration { display: block; font-size: 11px; line-height: 1.7; margin-top: 7px; }
+.tool-download { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px 10px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-size: 12px; line-height: 1.5; }
+.tool-download:hover { background: var(--accent-soft); }
 .contact-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .contact-links > a { display: grid; grid-template-columns: 1fr auto; gap: 14px; padding: 23px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; }
 .contact-icon { grid-column: 1; grid-row: 1; width: 26px; height: 26px; color: var(--accent); }
