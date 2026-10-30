@@ -80,6 +80,71 @@
     script.onerror = () => finish(false);
     document.head.append(script);
   }
+  // Versioned filenames change on each release; resolve the latest assets by format.
+  function releaseDownloads(repo, release) {
+    if (!release.tag_name || !Array.isArray(release.assets)) throw new Error("Invalid release");
+    const downloads = { tag: release.tag_name };
+    for (const format of ["exe", "dmg"]) {
+      const pattern = format === "exe" ? /windows-(?:x64|x86_64)\.exe$/i : /macos-arm64\.dmg$/i;
+      const asset = release.assets.find(item => pattern.test(item.name));
+      if (!asset) continue;
+      const url = new URL(asset.browser_download_url);
+      if (url.origin !== "https://github.com" || !url.pathname.startsWith(`/codemee/${repo}/releases/download/`) || !url.pathname.toLowerCase().endsWith("." + format)) {
+        throw new Error("Invalid download URL");
+      }
+      downloads[format] = url.href;
+    }
+    return downloads;
+  }
+  function renderDownloads(group, downloads) {
+    for (const format of ["exe", "dmg"]) {
+      const link = group.querySelector(`[data-format="${format}"]`);
+      const platform = format === "exe" ? "Windows .exe" : "macOS .dmg";
+      link.title = downloads.tag;
+      if (downloads[format]) {
+        link.href = downloads[format];
+        link.removeAttribute("aria-disabled");
+        link.textContent = "↓ " + platform;
+        link.setAttribute("aria-label", `下載 ${group.dataset.tool} ${platform}${format === "dmg" ? "（Apple Silicon）" : ""}`);
+      } else {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+        link.textContent = platform + " 暫未提供";
+        link.setAttribute("aria-label", `${group.dataset.tool} ${downloads.tag} 暫未提供 ${platform}`);
+      }
+    }
+    group.querySelector(".download-status").textContent = "最新版本 " + downloads.tag;
+  }
+  async function loadToolDownloads(group) {
+    const repo = group.dataset.repo;
+    if (!["fshot", "repdf", "rgpdf", "picview", "prkit"].includes(repo)) return;
+    const cacheKey = "codemee-release-" + repo;
+    const maxAge = 15 * 60 * 1000;
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey));
+      const age = Date.now() - cached?.checkedAt;
+      if (age >= 0 && age < maxAge) {
+        renderDownloads(group, releaseDownloads(repo, cached.release));
+        return;
+      }
+    } catch { /* Storage and cache contents are optional. */ }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(`https://api.github.com/repos/codemee/${repo}/releases/latest`, { signal: controller.signal });
+      if (!response.ok) throw new Error("Release request failed");
+      const release = await response.json();
+      renderDownloads(group, releaseDownloads(repo, release));
+      try {
+        // Cache only the fields needed to resolve downloads, without credentials.
+        const snapshot = { tag_name: release.tag_name, assets: release.assets.map(({ name, browser_download_url }) => ({ name, browser_download_url })) };
+        localStorage.setItem(cacheKey, JSON.stringify({ checkedAt: Date.now(), release: snapshot }));
+      } catch { /* Downloads also work when browser storage is disabled. */ }
+    } catch {
+      group.querySelector(".download-status").textContent = "暫時無法確認最新版本，請查看版本說明";
+    } finally { clearTimeout(timeout); }
+  }
+  document.querySelectorAll(".tool-downloads").forEach(loadToolDownloads);
   loadDev();
   loadBlogger();
 })();

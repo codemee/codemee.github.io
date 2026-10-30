@@ -86,8 +86,13 @@ h3 { margin: 0; }
 .all-projects { margin: 26px 0 0; }
 .tool-name > .platform { display: block; color: var(--accent); font-family: Consolas, monospace; font-size: 10px; margin-top: 9px; }
 .tool-name > .tool-inspiration { display: block; font-size: 11px; line-height: 1.7; margin-top: 7px; }
-.tool-download { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px 10px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-size: 12px; line-height: 1.5; }
+.tool-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.tool-download { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-size: 12px; line-height: 1.5; }
 .tool-download:hover { background: var(--accent-soft); }
+.tool-download[aria-disabled="true"] { color: var(--muted); border-color: var(--line); cursor: default; background: transparent; }
+.release-notes { align-self: center; color: var(--accent); font-size: 11px; line-height: 1.8; }
+.release-notes:hover { text-decoration: underline; text-underline-offset: 3px; }
+.download-status { flex-basis: 100%; color: var(--muted); font-size: 10px; line-height: 1.7; }
 .contact-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .contact-links > a { display: grid; grid-template-columns: 1fr auto; gap: 14px; padding: 23px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; }
 .contact-icon { grid-column: 1; grid-row: 1; width: 26px; height: 26px; color: var(--accent); }
@@ -131,7 +136,8 @@ footer { border-top: 1px solid var(--line); padding: 26px 0 32px; display: flex;
   .contact-links { grid-template-columns: 1fr; gap: 12px; }
   .tool { grid-template-columns: 54px 1fr 24px; gap: 16px; padding: 24px 0; }
   .tool-name h3 { font-size: 22px; }
-  .tool p { grid-column: 1 / -1; grid-row: 2; font-size: 13px; }
+  .tool-content { grid-column: 1 / -1; grid-row: 2; }
+  .tool p { font-size: 13px; }
   .tool-arrow { grid-column: 3; grid-row: 1; }
   footer { flex-wrap: wrap; font-size: 10px; }
   footer > span:nth-child(2) { order: 3; width: 100%; }
