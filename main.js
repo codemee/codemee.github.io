@@ -131,6 +131,8 @@
     document.head.append(script);
   }
   // Versioned filenames change on each release; resolve the latest assets by format.
+  const releaseRefreshInterval = 15 * 60 * 1000;
+  const pendingReleaseRequests = new WeakSet();
   function releaseDownloads(repo, release) {
     if (!release.tag_name || !Array.isArray(release.assets)) throw new Error("Invalid release");
     const downloads = { tag: release.tag_name };
@@ -167,19 +169,20 @@
     }
     group.querySelector(".download-status").textContent = text.latestVersion(downloads.tag);
   }
-  async function loadToolDownloads(group) {
+  async function loadToolDownloads(group, force = false) {
     const repo = group.dataset.repo;
     if (!["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor"].includes(repo)) return;
+    if (pendingReleaseRequests.has(group)) return;
     const cacheKey = "codemee-release-" + repo;
-    const maxAge = 15 * 60 * 1000;
     try {
       const cached = JSON.parse(localStorage.getItem(cacheKey));
       const age = Date.now() - cached?.checkedAt;
-      if (age >= 0 && age < maxAge) {
+      if (!force && age >= 0 && age < releaseRefreshInterval) {
         renderDownloads(group, releaseDownloads(repo, cached.release));
         return;
       }
     } catch { /* Storage and cache contents are optional. */ }
+    pendingReleaseRequests.add(group);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
@@ -194,9 +197,19 @@
       } catch { /* Downloads also work when browser storage is disabled. */ }
     } catch {
       group.querySelector(".download-status").textContent = text.releaseUnavailable;
-    } finally { clearTimeout(timeout); }
+    } finally {
+      clearTimeout(timeout);
+      pendingReleaseRequests.delete(group);
+    }
   }
-  document.querySelectorAll(".tool-downloads").forEach(loadToolDownloads);
+  function refreshToolDownloads(force = false) {
+    if (document.hidden) return;
+    document.querySelectorAll(".tool-downloads").forEach(group => loadToolDownloads(group, force));
+  }
+  refreshToolDownloads();
+  setInterval(() => refreshToolDownloads(true), releaseRefreshInterval);
+  document.addEventListener("visibilitychange", () => refreshToolDownloads());
+  window.addEventListener("focus", () => refreshToolDownloads());
   loadDev();
   loadBlogger();
 })();

@@ -134,6 +134,9 @@ test("dropdown closes after selection, outside click, and Escape, restoring keyb
 
 async function runMain(language, offline = false, savedTheme = null, blocked = false) {
   const theme = element(), themeSymbol = element(), status = element(), lifecycle = {};
+  const intervals = [], windowEvents = {}, clock = { now: Date.now() };
+  const releaseState = { tag: "v9.0.0", offline, requests: 0, wait: null };
+  class TestDate extends Date { static now() { return clock.now; } }
   const storage = new Map(savedTheme ? [["codemee-theme", savedTheme]] : []);
   const options = ["system", "light", "dark"].map(themeOption => element({ dataset: { themeOption } }));
   const summary = { focus() { this.focused = true; } };
@@ -147,6 +150,7 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
     cards[id] = card;
   }
   const document = {
+    hidden: false,
     documentElement: { lang: language, dataset: {}, removeAttribute(key) { if (key === "data-theme") delete this.dataset.theme; } },
     getElementById: id => ({ "theme-toggle": theme, "theme-symbol": themeSymbol, "theme-menu": themeMenu })[id] || cards[id] || element(),
     querySelector: selector => cards[selector.split(" ")[0].slice(1)].status,
@@ -154,26 +158,85 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
     addEventListener: (name, action) => { lifecycle[name] = action; },
     createElement: () => ({ remove() {} }), head: { append() {} }
   };
-  const window = {};
+  const window = { addEventListener: (name, action) => { windowEvents[name] = action; } };
   const context = {
-    document, window, URL, Date, Intl, AbortController,
+    document, window, URL, Date: TestDate, Intl, AbortController,
     setTimeout: () => 1, clearTimeout() {},
+    setInterval: (callback, delay) => { intervals.push({ callback, delay }); return intervals.length; },
     localStorage: {
       getItem(key) { if (blocked) throw Error("Disabled storage"); return storage.get(key) ?? null; },
       setItem(key, value) { if (blocked) throw Error("Disabled storage"); storage.set(key, value); }
     },
     fetch: async url => {
+      if (url.includes("api.github.com")) {
+        releaseState.requests++;
+        if (releaseState.wait) await releaseState.wait;
+        if (releaseState.offline) throw Error("Offline");
+        return { ok: true, json: async () => ({
+          tag_name: releaseState.tag,
+          assets: [{ name: "feditor-windows-x64.exe", browser_download_url: `https://github.com/codemee/feditor/releases/download/${releaseState.tag}/feditor-windows-x64.exe` }]
+        }) };
+      }
       if (offline) throw Error("Offline");
-      return { ok: true, json: async () => url.includes("api.github.com") ? {
-        tag_name: "v9.0.0", assets: [{ name: "feditor-windows-x64.exe", browser_download_url: "https://github.com/codemee/feditor/releases/download/v9.0.0/feditor-windows-x64.exe" }]
-      } : [{ title: "中文文章原題", url: "https://dev.to/codemee/article", published_at: "2026-11-04" }] };
+      return { ok: true, json: async () => [{ title: "中文文章原題", url: "https://dev.to/codemee/article", published_at: "2026-11-04" }] };
     }
   };
   vm.runInNewContext(mainScript, context);
   await new Promise(resolve => setImmediate(resolve));
   window.__codemeeBloggerLatest({ feed: { entry: [{ title: { $t: "Blogger 原題" }, published: { $t: "2026-11-04" }, link: [{ rel: "alternate", href: "https://meebox.blogspot.com/article" }] }] } });
-  return { theme, themeSymbol, status, links, cards, options, themeMenu, summary, lifecycle, document, storage };
+  return { theme, themeSymbol, status, links, cards, options, themeMenu, summary, lifecycle, document, storage, intervals, windowEvents, clock, releaseState };
 }
+
+test("release links update automatically every 15 minutes without reloading the page", async () => {
+  const ui = await runMain("en");
+  assert.equal(ui.intervals.length, 1);
+  assert.equal(ui.intervals[0].delay, 15 * 60 * 1000);
+  ui.releaseState.tag = "v10.0.0";
+  ui.intervals[0].callback();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(ui.releaseState.requests, 2);
+  assert.match(ui.links.exe.href, /v10\.0\.0/);
+  assert.equal(ui.status.textContent, "Latest release v10.0.0");
+});
+
+test("hidden tabs skip polling, and returning to an expired page refreshes once", async () => {
+  const ui = await runMain("en");
+  ui.document.hidden = true;
+  ui.clock.now += 16 * 60 * 1000;
+  ui.intervals[0].callback();
+  assert.equal(ui.releaseState.requests, 1);
+  ui.releaseState.tag = "v11.0.0";
+  ui.document.hidden = false;
+  ui.lifecycle.visibilitychange();
+  ui.windowEvents.focus();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(ui.releaseState.requests, 2);
+  assert.match(ui.links.exe.href, /v11\.0\.0/);
+  ui.windowEvents.focus();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(ui.releaseState.requests, 2);
+});
+
+test("automatic refresh avoids duplicate requests and recovers after a failed check", async () => {
+  const ui = await runMain("zh-Hant");
+  let resume;
+  ui.releaseState.wait = new Promise(resolve => { resume = resolve; });
+  ui.intervals[0].callback();
+  ui.intervals[0].callback();
+  assert.equal(ui.releaseState.requests, 2);
+  ui.releaseState.offline = true;
+  resume();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(ui.links.exe.href, /v9\.0\.0/);
+  assert.match(ui.status.textContent, /暫時無法確認/);
+  ui.releaseState.offline = false;
+  ui.releaseState.wait = null;
+  ui.releaseState.tag = "v12.0.0";
+  ui.intervals[0].callback();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(ui.links.exe.href, /v12\.0\.0/);
+  assert.equal(ui.status.textContent, "最新版本 v12.0.0");
+});
 
 test("English dynamic UI covers theme, feeds, release updates, and missing platform downloads", async () => {
   const ui = await runMain("en");

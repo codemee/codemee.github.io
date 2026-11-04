@@ -1,20 +1,23 @@
 :root {
   color-scheme: light;
   --font-body: 1.125rem; --font-secondary: 1rem; --font-small: .875rem;
-  --bg: #f5f4ef; --surface: #fcfbf8; --text: #242c2a; --muted: #646d67;
-  --line: #d6d9ce; --accent: #426547; --accent-soft: #e5eadd; --orange: #94622c;
+  --bg: #f4f6f9; --surface: #fff; --text: #1e2b40; --muted: #526176;
+  --line: #c9d2df; --accent: #174e98; --accent-soft: #e5edf9; --orange: #b52332;
+  --marker: #b52332; --signal: #d5a200;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #171222; --surface: #211a30; --text: #eee9f5; --muted: #b3a8c4;
     --line: #433452; --accent: #b1f35b; --accent-soft: #2d352b; --orange: #ffae65;
+    --marker: #b1f35b; --signal: #b1f35b;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #171222; --surface: #211a30; --text: #eee9f5; --muted: #b3a8c4;
   --line: #433452; --accent: #b1f35b; --accent-soft: #2d352b; --orange: #ffae65;
+  --marker: #b1f35b; --signal: #b1f35b;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 32px; }
@@ -41,12 +44,12 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .language-option-symbol, .theme-option-symbol { min-width: 26px; text-align: center; font-size: 16px; font-weight: 600; }
 .wordmark { font-size: 25px; font-weight: 750; letter-spacing: -1.3px; margin-right: auto; }
 .wordmark > span:first-child { font-weight: 400; }
-.accent-dot { color: var(--accent); }
+.accent-dot { color: var(--marker); }
 nav { display: flex; gap: 30px; font-size: var(--font-secondary); }
 nav a:hover, footer a:hover { color: var(--accent); }
 .intro { display: grid; grid-template-columns: 1fr 270px; gap: 72px; padding: 92px 0 88px; align-items: center; }
 .eyebrow { font-family: Consolas, "SFMono-Regular", monospace; color: var(--accent); font-size: var(--font-small); line-height: 1.6; letter-spacing: 1.8px; margin: 0 0 18px; }
-.status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: 2px; }
+.status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--signal); margin-right: 6px; vertical-align: 2px; }
 h1 { font-size: clamp(32px, 3.5vw, 46px); line-height: 1.4; letter-spacing: -1.6px; margin: 0 0 24px; font-weight: 600; }
 h1 > span { display: block; font-size: clamp(58px, 6.5vw, 82px); font-weight: 750; letter-spacing: -4px; line-height: 1.1; }
 .bio { font-size: 1.375rem; line-height: 1.9; margin: 28px 0 12px; }
@@ -55,7 +58,7 @@ h1 > span { display: block; font-size: clamp(58px, 6.5vw, 82px); font-weight: 75
 .text-link:hover { color: var(--orange); border-color: var(--orange); }
 .portrait { margin: 24px 0 0; }
 .portrait-frame { padding: 12px; border: 1px solid var(--line); position: relative; background: var(--surface); }
-.portrait-frame::before { content: ""; position: absolute; top: -9px; right: -9px; width: 48px; height: 48px; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+.portrait-frame::before { content: ""; position: absolute; top: -9px; right: -9px; width: 48px; height: 48px; border-top: 2px solid var(--marker); border-right: 2px solid var(--signal); }
 .portrait img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
 figcaption { display: flex; justify-content: space-between; margin-top: 16px; font-family: Consolas, monospace; font-size: 11px; letter-spacing: 2px; color: var(--muted); }
 figcaption span { color: var(--orange); }
