@@ -85,7 +85,9 @@
     if (!release.tag_name || !Array.isArray(release.assets)) throw new Error("Invalid release");
     const downloads = { tag: release.tag_name };
     for (const format of ["exe", "dmg"]) {
-      const pattern = format === "exe" ? /windows-(?:x64|x86_64)\.exe$/i : /macos-arm64\.dmg$/i;
+      const pattern = format === "exe"
+        ? /windows-(?:x64|x86_64)\.exe$/i
+        : repo === "feditor" ? /^feditor-macos(?:-arm64)?\.dmg$/i : /macos-arm64\.dmg$/i;
       const asset = release.assets.find(item => pattern.test(item.name));
       if (!asset) continue;
       const url = new URL(asset.browser_download_url);
@@ -117,7 +119,7 @@
   }
   async function loadToolDownloads(group) {
     const repo = group.dataset.repo;
-    if (!["fshot", "repdf", "rgpdf", "picview", "prkit"].includes(repo)) return;
+    if (!["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor"].includes(repo)) return;
     const cacheKey = "codemee-release-" + repo;
     const maxAge = 15 * 60 * 1000;
     try {
