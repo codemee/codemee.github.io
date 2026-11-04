@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#171222" media="(prefers-color-scheme: dark)">
   <title>codemee — 編輯、書寫與小工具</title>
   <link rel="icon" href="assets/avatar.png">
+  <script src="language.js"></script>
   <link rel="stylesheet" href="style.css">
   <script src="main.js" defer></script>
 </head>
@@ -18,7 +19,30 @@
     <header class="site-header">
       <a class="wordmark" href="#" aria-label="codemee 首頁">code<span>mee</span><span class="accent-dot">.</span></a>
       <nav aria-label="主要導覽"><a href="#writing">我的文章</a><a href="#tools">我的小工具</a><a href="#contact">與我聯絡</a></nav>
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="配色：跟隨系統，點擊切換淺色"><span aria-hidden="true">◐</span><span id="theme-label">跟隨系統</span></button>
+      <div class="header-controls">
+        <div class="language-control" role="group" aria-label="網頁語言">
+          <button id="language-toggle" class="language-toggle" type="button" aria-label="語言：跟隨瀏覽器，點擊切換為繁體中文" title="語言：跟隨瀏覽器，點擊切換為繁體中文"><span id="language-symbol" aria-hidden="true">🌐</span></button>
+          <details class="language-menu" id="language-menu">
+            <summary aria-label="選擇網頁語言" title="選擇網頁語言"><span aria-hidden="true">▾</span></summary>
+            <div class="language-options">
+              <a href="index.html?lang=auto" data-language="auto"><span class="language-option-symbol" aria-hidden="true">🌐</span><span>跟隨瀏覽器</span></a>
+              <a href="index.html?lang=zh" data-language="zh" lang="zh-Hant"><span class="language-option-symbol" aria-hidden="true">中</span><span>繁體中文</span></a>
+              <a href="en.html?lang=en" data-language="en" lang="en"><span class="language-option-symbol" aria-hidden="true">En</span><span>English</span></a>
+            </div>
+          </details>
+        </div>
+        <div class="theme-control" role="group" aria-label="配色模式">
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="配色：跟隨系統，點擊切換淺色" title="配色：跟隨系統，點擊切換淺色"><span id="theme-symbol" aria-hidden="true">◐</span></button>
+          <details class="theme-menu" id="theme-menu">
+            <summary aria-label="選擇配色模式" title="選擇配色模式"><span aria-hidden="true">▾</span></summary>
+            <div class="theme-options">
+              <button type="button" data-theme-option="system" aria-pressed="true"><span class="theme-option-symbol" aria-hidden="true">◐</span><span>跟隨系統</span></button>
+              <button type="button" data-theme-option="light" aria-pressed="false"><span class="theme-option-symbol" aria-hidden="true">☀</span><span>淺色</span></button>
+              <button type="button" data-theme-option="dark" aria-pressed="false"><span class="theme-option-symbol" aria-hidden="true">☾</span><span>深色</span></button>
+            </div>
+          </details>
+        </div>
+      </div>
     </header>
     <main id="main">
       <section class="intro" aria-labelledby="intro-title">

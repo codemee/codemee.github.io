@@ -25,15 +25,25 @@ button { font: inherit; }
 a, button { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid var(--orange); outline-offset: 6px; }
 .page { width: min(1080px, calc(100% - 112px)); margin: auto; }
-.site-header { display: flex; align-items: center; gap: 40px; min-height: 108px; border-bottom: 1px solid var(--line); }
+.site-header { display: flex; align-items: center; gap: 28px; min-height: 108px; border-bottom: 1px solid var(--line); }
+.header-controls { display: flex; align-items: center; gap: 12px; }
+.language-control, .theme-control { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 24px; }
+.language-toggle, .theme-toggle { display: grid; place-items: center; min-width: 48px; min-height: 44px; border: 0; border-radius: 24px 0 0 24px; background: transparent; color: var(--accent); font-size: 18px; font-weight: 600; cursor: pointer; }
+.language-menu, .theme-menu { position: relative; border-left: 1px solid var(--line); }
+.language-menu summary, .theme-menu summary { display: grid; place-items: center; min-width: 32px; min-height: 44px; border-radius: 0 24px 24px 0; color: var(--muted); cursor: pointer; list-style: none; }
+.language-menu summary::-webkit-details-marker, .theme-menu summary::-webkit-details-marker { display: none; }
+.language-toggle:hover, .theme-toggle:hover, .language-menu summary:hover, .theme-menu summary:hover { background: var(--accent-soft); color: var(--accent); }
+.language-options, .theme-options { position: absolute; top: calc(100% + 10px); left: -49px; z-index: 10; min-width: 205px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px #0002; }
+.theme-options { left: auto; right: 0; }
+.language-options a, .theme-options button { display: flex; gap: 12px; align-items: center; min-height: 44px; padding: 8px 12px; border-radius: 5px; font-size: var(--font-small); color: var(--text); }
+.theme-options button { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.language-options a:hover, .language-options a[aria-current="true"], .theme-options button:hover, .theme-options button[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); }
+.language-option-symbol, .theme-option-symbol { min-width: 26px; text-align: center; font-size: 16px; font-weight: 600; }
 .wordmark { font-size: 25px; font-weight: 750; letter-spacing: -1.3px; margin-right: auto; }
 .wordmark > span:first-child { font-weight: 400; }
 .accent-dot { color: var(--accent); }
 nav { display: flex; gap: 30px; font-size: var(--font-secondary); }
 nav a:hover, footer a:hover { color: var(--accent); }
-.theme-toggle { border: 1px solid var(--line); border-radius: 30px; padding: 9px 14px; color: var(--muted); background: transparent; display: flex; align-items: center; gap: 8px; font-size: var(--font-small); cursor: pointer; min-width: 110px; justify-content: center; }
-.theme-toggle:hover { background: var(--accent-soft); color: var(--accent); }
-.theme-toggle > span:first-child { font-size: 18px; line-height: 1; }
 .intro { display: grid; grid-template-columns: 1fr 270px; gap: 72px; padding: 92px 0 88px; align-items: center; }
 .eyebrow { font-family: Consolas, "SFMono-Regular", monospace; color: var(--accent); font-size: var(--font-small); line-height: 1.6; letter-spacing: 1.8px; margin: 0 0 18px; }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: 2px; }
@@ -105,9 +115,11 @@ h3 { margin: 0; }
 footer { flex-wrap: wrap; border-top: 1px solid var(--line); padding: 26px 0 32px; display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: var(--font-small); }
 .skip-link { position: fixed; top: -100px; left: 20px; z-index: 5; padding: 12px; background: var(--surface); color: var(--text); }
 .skip-link:focus { top: 12px; }
-@media (max-width: 850px) {
+@media (max-width: 1000px) {
   .site-header { flex-wrap: wrap; gap: 20px; padding: 24px 0; }
   nav { order: 3; width: 100%; flex-wrap: wrap; }
+}
+@media (max-width: 850px) {
   .page { width: calc(100% - 64px); }
   .intro { grid-template-columns: 1fr 210px; gap: 36px; padding: 68px 0; }
   .bio { font-size: 1.25rem; }
@@ -122,8 +134,8 @@ footer { flex-wrap: wrap; border-top: 1px solid var(--line); padding: 26px 0 32p
   .page { width: calc(100% - 40px); }
   .site-header { flex-wrap: wrap; gap: 20px; min-height: 100px; padding: 20px 0; }
   .wordmark { font-size: 23px; }
-  .theme-toggle { min-width: 100px; }
-  nav { order: 3; width: 100%; gap: 26px; font-size: var(--font-secondary); }
+  .header-controls { order: 3; width: 100%; justify-content: space-between; flex-wrap: wrap; }
+  nav { order: 2; width: 100%; gap: 26px; font-size: var(--font-secondary); }
   .intro { grid-template-columns: 1fr; gap: 32px; padding: 48px 0; }
   .intro-copy { order: 2; }
   .portrait { width: 156px; margin: 0; }

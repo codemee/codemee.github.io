@@ -1,25 +1,75 @@
 (() => {
   "use strict";
+  const isEnglish = document.documentElement.lang === "en";
+  const messages = {
+    en: {
+      system: "System", light: "Light", dark: "Dark",
+      theme: (current, next) => `Theme: ${current}. Switch to ${next}.`,
+      feedUpdated: "Latest article updated",
+      feedUnavailable: "Unable to refresh. Showing a previously retrieved article.",
+      download: (tool, platform, silicon) => `Download ${tool} for ${platform}${silicon ? " (Apple Silicon)" : ""}`,
+      notAvailable: "not available",
+      unavailableDownload: (tool, tag, platform) => `${tool} ${tag}: ${platform} is not available`,
+      latestVersion: tag => "Latest release " + tag,
+      releaseUnavailable: "Unable to check for updates. See release notes."
+    },
+    zh: {
+      system: "跟隨系統", light: "淺色", dark: "深色",
+      theme: (current, next) => `配色：${current}，點擊切換${next}`,
+      feedUpdated: "已更新最新文章",
+      feedUnavailable: "暫時無法更新，顯示先前取得的文章",
+      download: (tool, platform, silicon) => `下載 ${tool} ${platform}${silicon ? "（Apple Silicon）" : ""}`,
+      notAvailable: "暫未提供",
+      unavailableDownload: (tool, tag, platform) => `${tool} ${tag} 暫未提供 ${platform}`,
+      latestVersion: tag => "最新版本 " + tag,
+      releaseUnavailable: "暫時無法確認最新版本，請查看版本說明"
+    }
+  };
+  const text = messages[isEnglish ? "en" : "zh"];
   const modes = ["system", "light", "dark"];
-  const labels = { system: "跟隨系統", light: "淺色", dark: "深色" };
+  const labels = { system: text.system, light: text.light, dark: text.dark };
   let mode = "system";
   try {
     const saved = localStorage.getItem("codemee-theme");
     if (modes.includes(saved)) mode = saved;
   } catch { /* Storage may be disabled; theme controls still work. */ }
   const button = document.getElementById("theme-toggle");
+  const themeMenu = document.getElementById("theme-menu");
+  const themeOptions = document.querySelectorAll("[data-theme-option]");
+  const themeSymbols = { system: "◐", light: "☀", dark: "☾" };
   function applyTheme() {
     if (mode === "system") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.dataset.theme = mode;
-    document.getElementById("theme-label").textContent = labels[mode];
+    document.getElementById("theme-symbol").textContent = themeSymbols[mode];
     const next = modes[(modes.indexOf(mode) + 1) % modes.length];
-    button.setAttribute("aria-label", `配色：${labels[mode]}，點擊切換${labels[next]}`);
+    const label = text.theme(labels[mode], labels[next]);
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    themeOptions.forEach(option => option.setAttribute("aria-pressed", String(option.dataset.themeOption === mode)));
   }
-  applyTheme();
-  button.addEventListener("click", () => {
-    mode = modes[(modes.indexOf(mode) + 1) % modes.length];
+  function setTheme(selected) {
+    if (!modes.includes(selected)) return;
+    mode = selected;
     applyTheme();
     try { localStorage.setItem("codemee-theme", mode); } catch { /* Optional preference. */ }
+  }
+  applyTheme();
+  button.addEventListener("click", () => setTheme(modes[(modes.indexOf(mode) + 1) % modes.length]));
+  themeOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      setTheme(option.dataset.themeOption);
+      themeMenu.open = false;
+      themeMenu.querySelector("summary").focus();
+    });
+  });
+  document.addEventListener("click", event => {
+    if (!themeMenu.contains(event.target)) themeMenu.open = false;
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && themeMenu.open) {
+      themeMenu.open = false;
+      themeMenu.querySelector("summary").focus();
+    }
   });
   document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -37,10 +87,10 @@
     const time = card.querySelector("time");
     time.dateTime = date.toISOString();
     time.textContent = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Taipei" }).format(date).replaceAll("-", ".");
-    card.querySelector(".feed-status").textContent = "已更新最新文章";
+    card.querySelector(".feed-status").textContent = text.feedUpdated;
   }
   function unavailable(id) {
-    document.querySelector(`#${id} .feed-status`).textContent = "暫時無法更新，顯示先前取得的文章";
+    document.querySelector(`#${id} .feed-status`).textContent = text.feedUnavailable;
   }
   async function loadDev() {
     const controller = new AbortController();
@@ -107,15 +157,15 @@
         link.href = downloads[format];
         link.removeAttribute("aria-disabled");
         link.textContent = "↓ " + platform;
-        link.setAttribute("aria-label", `下載 ${group.dataset.tool} ${platform}${format === "dmg" ? "（Apple Silicon）" : ""}`);
+        link.setAttribute("aria-label", text.download(group.dataset.tool, platform, format === "dmg"));
       } else {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
-        link.textContent = platform + " 暫未提供";
-        link.setAttribute("aria-label", `${group.dataset.tool} ${downloads.tag} 暫未提供 ${platform}`);
+        link.textContent = platform + " " + text.notAvailable;
+        link.setAttribute("aria-label", text.unavailableDownload(group.dataset.tool, downloads.tag, platform));
       }
     }
-    group.querySelector(".download-status").textContent = "最新版本 " + downloads.tag;
+    group.querySelector(".download-status").textContent = text.latestVersion(downloads.tag);
   }
   async function loadToolDownloads(group) {
     const repo = group.dataset.repo;
@@ -143,7 +193,7 @@
         localStorage.setItem(cacheKey, JSON.stringify({ checkedAt: Date.now(), release: snapshot }));
       } catch { /* Downloads also work when browser storage is disabled. */ }
     } catch {
-      group.querySelector(".download-status").textContent = "暫時無法確認最新版本，請查看版本說明";
+      group.querySelector(".download-status").textContent = text.releaseUnavailable;
     } finally { clearTimeout(timeout); }
   }
   document.querySelectorAll(".tool-downloads").forEach(loadToolDownloads);
