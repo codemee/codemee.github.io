@@ -186,7 +186,7 @@
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch(`https://api.github.com/repos/codemee/${repo}/releases/latest`, { signal: controller.signal });
+      const response = await fetch(`https://api.github.com/repos/codemee/${repo}/releases/latest`, { signal: controller.signal, cache: "no-store" });
       if (!response.ok) throw new Error("Release request failed");
       const release = await response.json();
       renderDownloads(group, releaseDownloads(repo, release));
@@ -206,7 +206,8 @@
     if (document.hidden) return;
     document.querySelectorAll(".tool-downloads").forEach(group => loadToolDownloads(group, force));
   }
-  refreshToolDownloads();
+  // Every page load checks GitHub, even if a recent release is already cached.
+  document.querySelectorAll(".tool-downloads").forEach(group => loadToolDownloads(group, true));
   setInterval(() => refreshToolDownloads(true), releaseRefreshInterval);
   document.addEventListener("visibilitychange", () => refreshToolDownloads());
   window.addEventListener("focus", () => refreshToolDownloads());

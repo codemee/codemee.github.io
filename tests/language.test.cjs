@@ -132,12 +132,13 @@ test("dropdown closes after selection, outside click, and Escape, restoring keyb
   assert.equal(state.menu.open, false);
 });
 
-async function runMain(language, offline = false, savedTheme = null, blocked = false) {
+async function runMain(language, offline = false, savedTheme = null, blocked = false, cachedRelease = null) {
   const theme = element(), themeSymbol = element(), status = element(), lifecycle = {};
   const intervals = [], windowEvents = {}, clock = { now: Date.now() };
   const releaseState = { tag: "v9.0.0", offline, requests: 0, wait: null };
   class TestDate extends Date { static now() { return clock.now; } }
   const storage = new Map(savedTheme ? [["codemee-theme", savedTheme]] : []);
+  if (cachedRelease) storage.set("codemee-release-feditor", JSON.stringify({ checkedAt: clock.now, release: cachedRelease }));
   const options = ["system", "light", "dark"].map(themeOption => element({ dataset: { themeOption } }));
   const summary = { focus() { this.focused = true; } };
   const themeMenu = { open: false, querySelector: () => summary, contains: target => target === summary || options.includes(target) };
@@ -167,9 +168,10 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
       getItem(key) { if (blocked) throw Error("Disabled storage"); return storage.get(key) ?? null; },
       setItem(key, value) { if (blocked) throw Error("Disabled storage"); storage.set(key, value); }
     },
-    fetch: async url => {
+    fetch: async (url, options) => {
       if (url.includes("api.github.com")) {
         releaseState.requests++;
+        releaseState.requestOptions = options;
         if (releaseState.wait) await releaseState.wait;
         if (releaseState.offline) throw Error("Offline");
         return { ok: true, json: async () => ({
@@ -186,6 +188,24 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
   window.__codemeeBloggerLatest({ feed: { entry: [{ title: { $t: "Blogger 原題" }, published: { $t: "2026-11-04" }, link: [{ rel: "alternate", href: "https://meebox.blogspot.com/article" }] }] } });
   return { theme, themeSymbol, status, links, cards, options, themeMenu, summary, lifecycle, document, storage, intervals, windowEvents, clock, releaseState };
 }
+
+test("each page load bypasses fresh release caches and the browser HTTP cache", async () => {
+  const cached = {
+    tag_name: "v8.0.0",
+    assets: [{ name: "feditor-windows-x64.exe", browser_download_url: "https://github.com/codemee/feditor/releases/download/v8.0.0/feditor-windows-x64.exe" }]
+  };
+  for (const language of ["en", "zh-Hant"]) {
+    const ui = await runMain(language, false, null, false, cached);
+    assert.equal(ui.releaseState.requests, 1);
+    assert.equal(ui.releaseState.requestOptions.cache, "no-store");
+    assert.match(ui.links.exe.href, /v9\.0\.0/);
+    assert.equal(JSON.parse(ui.storage.get("codemee-release-feditor")).release.tag_name, "v9.0.0");
+    const failed = await runMain(language, true, null, false, cached);
+    assert.equal(failed.releaseState.requests, 1);
+    assert.equal(failed.links.exe.href, "previous-exe");
+    assert.match(failed.status.textContent, language === "en" ? /Unable to check/ : /暫時無法確認/);
+  }
+});
 
 test("release links update automatically every 15 minutes without reloading the page", async () => {
   const ui = await runMain("en");
