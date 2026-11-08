@@ -7,6 +7,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const languageScript = fs.readFileSync(path.join(root, "language.js"), "utf8");
 const mainScript = fs.readFileSync(path.join(root, "main.js"), "utf8");
+const releases = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "releases.json"), "utf8"));
 
 function element(extra = {}) {
   return {
@@ -132,18 +133,19 @@ test("dropdown closes after selection, outside click, and Escape, restoring keyb
   assert.equal(state.menu.open, false);
 });
 
-async function runMain(language, offline = false, savedTheme = null, blocked = false, cachedRelease = null) {
+async function runMain(language, offline = false, savedTheme = null, blocked = false, cachedRelease = null, settings = {}) {
   const theme = element(), themeSymbol = element(), status = element(), lifecycle = {};
   const intervals = [], windowEvents = {}, clock = { now: Date.now() };
   const releaseState = { tag: "v9.0.0", offline, requests: 0, wait: null };
   class TestDate extends Date { static now() { return clock.now; } }
   const storage = new Map(savedTheme ? [["codemee-theme", savedTheme]] : []);
-  if (cachedRelease) storage.set("codemee-release-feditor", JSON.stringify({ checkedAt: clock.now, release: cachedRelease }));
+  const repo = settings.repo || "feditor";
+  if (cachedRelease) storage.set("codemee-release-" + repo, JSON.stringify({ checkedAt: clock.now, release: cachedRelease }));
   const options = ["system", "light", "dark"].map(themeOption => element({ dataset: { themeOption } }));
   const summary = { focus() { this.focused = true; } };
   const themeMenu = { open: false, querySelector: () => summary, contains: target => target === summary || options.includes(target) };
-  const links = { exe: element({ href: "previous-exe" }), dmg: element({ href: "previous-dmg" }) };
-  const group = { dataset: { repo: "feditor", tool: "FEditor" }, querySelector: selector => selector === ".download-status" ? status : links[selector.includes("exe") ? "exe" : "dmg"] };
+  const links = { exe: element({ href: "previous-exe", dataset: { extension: repo === "feditor" || repo === "mvapp" ? "exe" : "zip" } }), dmg: settings.windowsOnly ? null : element({ href: "previous-dmg" }) };
+  const group = { dataset: { repo, tool: settings.tool || "FEditor" }, querySelector: selector => selector === ".download-status" ? status : links[selector.includes("windows") ? "exe" : "dmg"] };
   const cards = {};
   for (const id of ["dev-article", "blogger-article"]) {
     const card = { link: element(), time: element(), status: element() };
@@ -171,10 +173,11 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
     fetch: async (url, options) => {
       if (url.includes("api.github.com")) {
         releaseState.requests++;
+        releaseState.requestedUrl = url;
         releaseState.requestOptions = options;
         if (releaseState.wait) await releaseState.wait;
         if (releaseState.offline) throw Error("Offline");
-        return { ok: true, json: async () => ({
+        return { ok: true, json: async () => settings.release || ({
           tag_name: releaseState.tag,
           assets: [{ name: "feditor-windows-x64.exe", browser_download_url: `https://github.com/codemee/feditor/releases/download/${releaseState.tag}/feditor-windows-x64.exe` }]
         }) };
@@ -205,6 +208,54 @@ test("each page load bypasses fresh release caches and the browser HTTP cache", 
     assert.equal(failed.links.exe.href, "previous-exe");
     assert.match(failed.status.textContent, language === "en" ? /Unable to check/ : /暫時無法確認/);
   }
+});
+
+test("verified release assets select application ZIPs and retain FEditor EXE downloads", async () => {
+  for (const language of ["en", "zh-Hant"]) {
+    for (const repo of ["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor", "mvapp"]) {
+      const ui = await runMain(language, false, null, false, null, { repo, release: releases[repo], windowsOnly: repo === "mvapp" });
+      const extension = repo === "feditor" || repo === "mvapp" ? "exe" : "zip";
+      assert.equal(ui.releaseState.requestedUrl, `https://api.github.com/repos/codemee/${repo}/releases/latest`);
+      assert.ok(ui.links.exe.href.endsWith("." + extension));
+      assert.doesNotMatch(ui.links.exe.href, /licenses|sha256/i);
+      assert.equal(ui.links.exe.textContent, "↓ Windows ." + extension);
+      assert.equal(ui.links.exe.dataset.extension, extension);
+      if (repo === "mvapp") assert.equal(ui.links.dmg, null);
+      else assert.ok(ui.links.dmg.href.endsWith(".dmg"));
+    }
+  }
+});
+
+test("ZIP upgrades win over legacy EXEs and ignore source, licenses, checksums, and other architectures", async () => {
+  const names = ["repdf-source.zip", "repdf-1-windows-x86_64-licenses.zip", "repdf-1-windows-x86_64.exe", "repdf-1-windows-arm64.zip", "repdf-1-windows-x86_64.zip.sha256", "repdf-1-windows-x86_64.zip"];
+  const release = { tag_name: "v1", assets: names.map(name => ({ name, browser_download_url: "https://github.com/codemee/repdf/releases/download/v1/" + name })) };
+  const ui = await runMain("en", false, null, false, null, { repo: "repdf", release });
+  assert.equal(ui.links.exe.href, "https://github.com/codemee/repdf/releases/download/v1/repdf-1-windows-x86_64.zip");
+  assert.equal(ui.links.exe.textContent, "↓ Windows .zip");
+  const legacy = await runMain("en", false, null, false, null, { repo: "repdf", release: { ...release, assets: release.assets.filter(asset => asset.name.endsWith(".exe")) } });
+  assert.equal(legacy.links.exe.textContent, "↓ Windows .exe");
+});
+
+test("mvApp remains Windows-only and automatically follows future ZIP packaging", async () => {
+  const ui = await runMain("en", false, null, false, null, {
+    repo: "mvapp", tool: "mvApp", windowsOnly: true,
+    release: { tag_name: "v2", assets: [
+      { name: "mvapp.exe", browser_download_url: "https://github.com/codemee/mvapp/releases/download/v2/mvapp.exe" },
+      { name: "mvapp.zip", browser_download_url: "https://github.com/codemee/mvapp/releases/download/v2/mvapp.zip" }
+    ] }
+  });
+  assert.equal(ui.links.exe.href, "https://github.com/codemee/mvapp/releases/download/v2/mvapp.zip");
+  assert.equal(ui.links.exe["aria-label"], "Download mvApp for Windows .zip");
+  assert.equal(ui.status.textContent, "Latest release v2");
+});
+
+test("unexpected download hosts are rejected without replacing existing links", async () => {
+  const ui = await runMain("en", false, null, false, null, {
+    repo: "mvapp", windowsOnly: true,
+    release: { tag_name: "v2", assets: [{ name: "mvapp.exe", browser_download_url: "https://example.com/mvapp.exe" }] }
+  });
+  assert.equal(ui.links.exe.href, "previous-exe");
+  assert.match(ui.status.textContent, /Unable to check/);
 });
 
 test("release links update automatically every 15 minutes without reloading the page", async () => {
@@ -323,8 +374,14 @@ test("both static pages keep all tools, download URLs, images, and contact links
   const targets = html => [...html.matchAll(/(?:href|src)="([^"]+)"/g)].map(match => match[1]).sort();
   assert.deepEqual(targets(en), targets(zh));
   for (const html of [zh, en]) {
-    assert.equal((html.match(/class="tool"/g) || []).length, 6);
-    assert.equal((html.match(/class="tool-download"/g) || []).length, 12);
+    assert.equal((html.match(/class="tool"/g) || []).length, 7);
+    assert.equal((html.match(/class="tool-download"/g) || []).length, 13);
+    assert.equal((html.match(/data-format="windows"/g) || []).length, 7);
+    assert.equal((html.match(/data-format="dmg"/g) || []).length, 6);
+    const mvapp = html.match(/<div class="tool" id="mvapp">.*?<\/p>.*?<\/div><\/div><a class="tool-arrow"[^]*?<\/a><\/div>/)?.[0];
+    assert.ok(mvapp);
+    assert.doesNotMatch(mvapp, /data-format="dmg"/);
+    assert.doesNotMatch(html, /All six tools support|六款工具皆支援/);
     assert.ok(html.indexOf('src="language.js"') < html.indexOf('href="style.css"'));
   }
   const untranslated = en.replace(/<a class="post-link"[^>]*>.*?<\/a>/g, "")

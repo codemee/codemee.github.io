@@ -136,27 +136,43 @@
   function releaseDownloads(repo, release) {
     if (!release.tag_name || !Array.isArray(release.assets)) throw new Error("Invalid release");
     const downloads = { tag: release.tag_name };
-    for (const format of ["exe", "dmg"]) {
-      const pattern = format === "exe"
-        ? /windows-(?:x64|x86_64)\.exe$/i
-        : repo === "feditor" ? /^feditor-macos(?:-arm64)?\.dmg$/i : /macos-arm64\.dmg$/i;
-      const asset = release.assets.find(item => pattern.test(item.name));
+    for (const format of ["windows", "dmg"]) {
+      let asset;
+      if (format === "windows") {
+        const pattern = repo === "mvapp"
+          ? /^mvapp(?:-windows-(?:x64|x86_64))?\.(zip|exe)$/i
+          : /windows-(?:x64|x86_64)\.(zip|exe)$/i;
+        // Prefer the new ZIP packages, while supporting older EXE releases.
+        const extensions = repo === "feditor" ? ["exe"] : ["zip", "exe"];
+        for (const extension of extensions) {
+          asset = release.assets.find(item => pattern.test(item.name) && item.name.toLowerCase().endsWith("." + extension));
+          if (asset) break;
+        }
+      } else if (repo !== "mvapp") {
+        const pattern = repo === "feditor" ? /^feditor-macos(?:-arm64)?\.dmg$/i : /macos-arm64\.dmg$/i;
+        asset = release.assets.find(item => pattern.test(item.name));
+      }
       if (!asset) continue;
       const url = new URL(asset.browser_download_url);
-      if (url.origin !== "https://github.com" || !url.pathname.startsWith(`/codemee/${repo}/releases/download/`) || !url.pathname.toLowerCase().endsWith("." + format)) {
+      const extension = format === "windows" ? asset.name.split(".").pop().toLowerCase() : "dmg";
+      if (url.origin !== "https://github.com" || !url.pathname.startsWith(`/codemee/${repo}/releases/download/`) || !url.pathname.toLowerCase().endsWith("." + extension)) {
         throw new Error("Invalid download URL");
       }
       downloads[format] = url.href;
+      if (format === "windows") downloads.windowsFormat = extension;
     }
     return downloads;
   }
   function renderDownloads(group, downloads) {
-    for (const format of ["exe", "dmg"]) {
+    for (const format of ["windows", "dmg"]) {
       const link = group.querySelector(`[data-format="${format}"]`);
-      const platform = format === "exe" ? "Windows .exe" : "macOS .dmg";
+      if (!link) continue;
+      const extension = downloads.windowsFormat || link.dataset.extension || "zip";
+      const platform = format === "windows" ? "Windows ." + extension : "macOS .dmg";
       link.title = downloads.tag;
       if (downloads[format]) {
         link.href = downloads[format];
+        if (format === "windows") link.dataset.extension = extension;
         link.removeAttribute("aria-disabled");
         link.textContent = "↓ " + platform;
         link.setAttribute("aria-label", text.download(group.dataset.tool, platform, format === "dmg"));
@@ -171,7 +187,7 @@
   }
   async function loadToolDownloads(group, force = false) {
     const repo = group.dataset.repo;
-    if (!["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor"].includes(repo)) return;
+    if (!["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor", "mvapp"].includes(repo)) return;
     if (pendingReleaseRequests.has(group)) return;
     const cacheKey = "codemee-release-" + repo;
     try {

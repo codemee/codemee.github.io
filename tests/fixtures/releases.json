@@ -1,0 +1,185 @@
+{
+  "fshot": {
+    "tag_name": "v0.1.13",
+    "assets": [
+      {
+        "name": "FShot-0.1.13-macos-arm64.dmg",
+        "browser_download_url": "https://github.com/codemee/fshot/releases/download/v0.1.13/FShot-0.1.13-macos-arm64.dmg"
+      },
+      {
+        "name": "FShot-0.1.13-windows-x64.zip",
+        "browser_download_url": "https://github.com/codemee/fshot/releases/download/v0.1.13/FShot-0.1.13-windows-x64.zip"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "browser_download_url": "https://github.com/codemee/fshot/releases/download/v0.1.13/SHA256SUMS.txt"
+      }
+    ]
+  },
+  "repdf": {
+    "tag_name": "v0.1.20",
+    "assets": [
+      {
+        "name": "LICENSE.txt",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/LICENSE.txt"
+      },
+      {
+        "name": "NOTICE.txt",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/NOTICE.txt"
+      },
+      {
+        "name": "repdf-0.1.20-macos-arm64-licenses.zip",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-macos-arm64-licenses.zip"
+      },
+      {
+        "name": "repdf-0.1.20-macos-arm64.dmg",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-macos-arm64.dmg"
+      },
+      {
+        "name": "repdf-0.1.20-macos-arm64.dmg.sha256",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-macos-arm64.dmg.sha256"
+      },
+      {
+        "name": "repdf-0.1.20-py3-none-any.whl",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-py3-none-any.whl"
+      },
+      {
+        "name": "repdf-0.1.20-windows-x86_64-licenses.zip",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-windows-x86_64-licenses.zip"
+      },
+      {
+        "name": "repdf-0.1.20-windows-x86_64.zip",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-windows-x86_64.zip"
+      },
+      {
+        "name": "repdf-0.1.20-windows-x86_64.zip.sha256",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20-windows-x86_64.zip.sha256"
+      },
+      {
+        "name": "repdf-0.1.20.tar.gz",
+        "browser_download_url": "https://github.com/codemee/repdf/releases/download/v0.1.20/repdf-0.1.20.tar.gz"
+      }
+    ]
+  },
+  "rgpdf": {
+    "tag_name": "v0.1.11",
+    "assets": [
+      {
+        "name": "LICENSE",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/LICENSE"
+      },
+      {
+        "name": "rgpdf-0.1.11-macos-arm64.dmg",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-macos-arm64.dmg"
+      },
+      {
+        "name": "rgpdf-0.1.11-macos-arm64.dmg.sha256",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-macos-arm64.dmg.sha256"
+      },
+      {
+        "name": "rgpdf-0.1.11-source.tar.gz",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-source.tar.gz"
+      },
+      {
+        "name": "rgpdf-0.1.11-source.tar.gz.sha256",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-source.tar.gz.sha256"
+      },
+      {
+        "name": "rgpdf-0.1.11-third-party-sources.tar.gz",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-third-party-sources.tar.gz"
+      },
+      {
+        "name": "rgpdf-0.1.11-third-party-sources.tar.gz.sha256",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-third-party-sources.tar.gz.sha256"
+      },
+      {
+        "name": "rgpdf-0.1.11-windows-x86_64.zip",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-windows-x86_64.zip"
+      },
+      {
+        "name": "rgpdf-0.1.11-windows-x86_64.zip.sha256",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/rgpdf-0.1.11-windows-x86_64.zip.sha256"
+      },
+      {
+        "name": "THIRD-PARTY-NOTICES.md",
+        "browser_download_url": "https://github.com/codemee/rgpdf/releases/download/v0.1.11/THIRD-PARTY-NOTICES.md"
+      }
+    ]
+  },
+  "picview": {
+    "tag_name": "v0.1.10",
+    "assets": [
+      {
+        "name": "PicView-0.1.10-macos-arm64-LICENSE.txt",
+        "browser_download_url": "https://github.com/codemee/picview/releases/download/v0.1.10/PicView-0.1.10-macos-arm64-LICENSE.txt"
+      },
+      {
+        "name": "PicView-0.1.10-macos-arm64.dmg",
+        "browser_download_url": "https://github.com/codemee/picview/releases/download/v0.1.10/PicView-0.1.10-macos-arm64.dmg"
+      },
+      {
+        "name": "PicView-0.1.10-macos-arm64.dmg.sha256",
+        "browser_download_url": "https://github.com/codemee/picview/releases/download/v0.1.10/PicView-0.1.10-macos-arm64.dmg.sha256"
+      },
+      {
+        "name": "PicView-0.1.10-windows-x64-LICENSE.txt",
+        "browser_download_url": "https://github.com/codemee/picview/releases/download/v0.1.10/PicView-0.1.10-windows-x64-LICENSE.txt"
+      },
+      {
+        "name": "PicView-0.1.10-windows-x64.zip",
+        "browser_download_url": "https://github.com/codemee/picview/releases/download/v0.1.10/PicView-0.1.10-windows-x64.zip"
+      },
+      {
+        "name": "PicView-0.1.10-windows-x64.zip.sha256",
+        "browser_download_url": "https://github.com/codemee/picview/releases/download/v0.1.10/PicView-0.1.10-windows-x64.zip.sha256"
+      }
+    ]
+  },
+  "prkit": {
+    "tag_name": "v0.3.1",
+    "assets": [
+      {
+        "name": "PRKit-0.3.1-macos-arm64.dmg",
+        "browser_download_url": "https://github.com/codemee/prkit/releases/download/v0.3.1/PRKit-0.3.1-macos-arm64.dmg"
+      },
+      {
+        "name": "PRKit-0.3.1-macos-arm64.dmg.sha256",
+        "browser_download_url": "https://github.com/codemee/prkit/releases/download/v0.3.1/PRKit-0.3.1-macos-arm64.dmg.sha256"
+      },
+      {
+        "name": "PRKit-0.3.1-windows-x64.zip",
+        "browser_download_url": "https://github.com/codemee/prkit/releases/download/v0.3.1/PRKit-0.3.1-windows-x64.zip"
+      },
+      {
+        "name": "PRKit-0.3.1-windows-x64.zip.sha256",
+        "browser_download_url": "https://github.com/codemee/prkit/releases/download/v0.3.1/PRKit-0.3.1-windows-x64.zip.sha256"
+      }
+    ]
+  },
+  "feditor": {
+    "tag_name": "v0.11.0",
+    "assets": [
+      {
+        "name": "feditor-linux-x64.tar.gz",
+        "browser_download_url": "https://github.com/codemee/feditor/releases/download/v0.11.0/feditor-linux-x64.tar.gz"
+      },
+      {
+        "name": "feditor-macos.dmg",
+        "browser_download_url": "https://github.com/codemee/feditor/releases/download/v0.11.0/feditor-macos.dmg"
+      },
+      {
+        "name": "feditor-windows-x64.exe",
+        "browser_download_url": "https://github.com/codemee/feditor/releases/download/v0.11.0/feditor-windows-x64.exe"
+      }
+    ]
+  },
+  "mvapp": {
+    "tag_name": "v0.1.2",
+    "assets": [
+      {
+        "name": "mvapp.exe",
+        "browser_download_url": "https://github.com/codemee/mvapp/releases/download/v0.1.2/mvapp.exe"
+      }
+    ]
+  }
+}
