@@ -258,6 +258,34 @@ test("unexpected download hosts are rejected without replacing existing links", 
   assert.match(ui.status.textContent, /Unable to check/);
 });
 
+test("GitHub repository names are case-insensitive while download URL spelling is preserved", async () => {
+  const downloadUrl = "https://github.com/CodeMee/mvApp/releases/download/vMixedCase/mvapp.exe";
+  for (const language of ["en", "zh-Hant"]) {
+    const ui = await runMain(language, false, null, false, null, {
+      repo: "mvapp", tool: "mvApp", windowsOnly: true,
+      release: { tag_name: "vMixedCase", assets: [{ name: "mvapp.exe", browser_download_url: downloadUrl }] }
+    });
+    assert.equal(ui.links.exe.href, downloadUrl);
+    assert.ok(ui.status.textContent.includes("vMixedCase"));
+    assert.equal(JSON.parse(ui.storage.get("codemee-release-mvapp")).release.assets[0].browser_download_url, downloadUrl);
+  }
+});
+
+test("case-insensitive matching still rejects other owners, repositories, and non-download paths", async () => {
+  for (const url of [
+    "https://github.com/another-owner/mvApp/releases/download/v1/mvapp.exe",
+    "https://github.com/codemee/mvApp-other/releases/download/v1/mvapp.exe",
+    "https://github.com/codemee/mvApp/releases/tag/v1/mvapp.exe"
+  ]) {
+    const ui = await runMain("en", false, null, false, null, {
+      repo: "mvapp", windowsOnly: true,
+      release: { tag_name: "v1", assets: [{ name: "mvapp.exe", browser_download_url: url }] }
+    });
+    assert.equal(ui.links.exe.href, "previous-exe");
+    assert.match(ui.status.textContent, /Unable to check/);
+  }
+});
+
 test("release links update automatically every 15 minutes without reloading the page", async () => {
   const ui = await runMain("en");
   assert.equal(ui.intervals.length, 1);

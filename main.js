@@ -155,7 +155,7 @@
       if (!asset) continue;
       const url = new URL(asset.browser_download_url);
       const extension = format === "windows" ? asset.name.split(".").pop().toLowerCase() : "dmg";
-      if (url.origin !== "https://github.com" || !url.pathname.startsWith(`/codemee/${repo}/releases/download/`) || !url.pathname.toLowerCase().endsWith("." + extension)) {
+      if (url.origin !== "https://github.com" || !url.pathname.toLowerCase().startsWith(`/codemee/${repo}/releases/download/`.toLowerCase()) || !url.pathname.toLowerCase().endsWith("." + extension)) {
         throw new Error("Invalid download URL");
       }
       downloads[format] = url.href;
