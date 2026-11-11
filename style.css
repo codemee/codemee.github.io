@@ -42,6 +42,8 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .theme-options button { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; }
 .language-options a:hover, .language-options a[aria-current="true"], .theme-options button:hover, .theme-options button[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); }
 .language-option-symbol, .theme-option-symbol { min-width: 26px; text-align: center; font-size: 16px; font-weight: 600; }
+.language-option-symbol { display: inline-flex; align-items: center; justify-content: center; }
+.language-globe { display: block; width: 20px; height: 20px; }
 .wordmark { font-size: 25px; font-weight: 750; letter-spacing: -1.3px; margin-right: auto; }
 .wordmark > span:first-child { font-weight: 400; }
 .accent-dot { color: var(--marker); }

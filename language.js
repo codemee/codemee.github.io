@@ -52,7 +52,10 @@
     const label = english
       ? `Language: ${labels[preference]}. Switch to ${labels[next]}.`
       : `語言：${labels[preference]}，點擊切換為${labels[next]}`;
-    document.getElementById("language-symbol").textContent = { auto: "🌐", zh: "中", en: "En" }[preference];
+    // Auto keeps the inline SVG, which follows the active theme via currentColor.
+    if (preference !== "auto") {
+      document.getElementById("language-symbol").textContent = { zh: "中", en: "En" }[preference];
+    }
     toggle.setAttribute("aria-label", label);
     toggle.title = label;
     toggle.addEventListener("click", () => window.location.assign(languageUrl(next)));

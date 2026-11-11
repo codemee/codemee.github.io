@@ -103,7 +103,7 @@ test("language URLs work with storage disabled and preserve the current section"
 
 test("status button shows the chosen mode and cycles Auto, Chinese, English", () => {
   const automatic = runLanguage({ browser: "zh-TW" });
-  assert.equal(automatic.symbol.textContent, "🌐");
+  assert.match(automatic.toggle["aria-label"], /跟隨瀏覽器/);
   automatic.toggle.events.click();
   assert.equal(automatic.navigations[0], "https://codemee.github.io/index.html?lang=zh");
   const chinese = runLanguage({ browser: "en-US", saved: "zh" });
