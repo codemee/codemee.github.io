@@ -140,12 +140,13 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
   class TestDate extends Date { static now() { return clock.now; } }
   const storage = new Map(savedTheme ? [["codemee-theme", savedTheme]] : []);
   const repo = settings.repo || "feditor";
-  if (cachedRelease) storage.set("codemee-release-" + repo, JSON.stringify({ checkedAt: clock.now, release: cachedRelease }));
+  if (cachedRelease) storage.set("codemee-release-" + repo, JSON.stringify({ checkedAt: new Date(clock.now).toISOString(), release: cachedRelease }));
   const options = ["system", "light", "dark"].map(themeOption => element({ dataset: { themeOption } }));
   const summary = { focus() { this.focused = true; } };
   const themeMenu = { open: false, querySelector: () => summary, contains: target => target === summary || options.includes(target) };
   const links = { exe: element({ href: "previous-exe", dataset: { extension: repo === "feditor" || repo === "mvapp" ? "exe" : "zip" } }), dmg: settings.windowsOnly ? null : element({ href: "previous-dmg" }) };
   const group = { dataset: { repo, tool: settings.tool || "FEditor" }, querySelector: selector => selector === ".download-status" ? status : links[selector.includes("windows") ? "exe" : "dmg"] };
+  const extraGroups = settings.groups || [];
   const cards = {};
   for (const id of ["dev-article", "blogger-article"]) {
     const card = { link: element(), time: element(), status: element() };
@@ -157,7 +158,7 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
     documentElement: { lang: language, dataset: {}, removeAttribute(key) { if (key === "data-theme") delete this.dataset.theme; } },
     getElementById: id => ({ "theme-toggle": theme, "theme-symbol": themeSymbol, "theme-menu": themeMenu })[id] || cards[id] || element(),
     querySelector: selector => cards[selector.split(" ")[0].slice(1)].status,
-    querySelectorAll: selector => selector === "[data-theme-option]" ? options : [group],
+    querySelectorAll: selector => selector === "[data-theme-option]" ? options : [group, ...extraGroups],
     addEventListener: (name, action) => { lifecycle[name] = action; },
     createElement: () => ({ remove() {} }), head: { append() {} }
   };
@@ -171,16 +172,16 @@ async function runMain(language, offline = false, savedTheme = null, blocked = f
       setItem(key, value) { if (blocked) throw Error("Disabled storage"); storage.set(key, value); }
     },
     fetch: async (url, options) => {
-      if (url.includes("api.github.com")) {
+      if (url === "releases.json") {
         releaseState.requests++;
         releaseState.requestedUrl = url;
         releaseState.requestOptions = options;
         if (releaseState.wait) await releaseState.wait;
         if (releaseState.offline) throw Error("Offline");
-        return { ok: true, json: async () => settings.release || ({
+        return { ok: true, json: async () => settings.data || ({ schemaVersion: 1, tools: { [repo]: { checkedAt: new Date(clock.now).toISOString(), release: settings.release || ({
           tag_name: releaseState.tag,
           assets: [{ name: "feditor-windows-x64.exe", browser_download_url: `https://github.com/codemee/feditor/releases/download/${releaseState.tag}/feditor-windows-x64.exe` }]
-        }) };
+        }) } } }) };
       }
       if (offline) throw Error("Offline");
       return { ok: true, json: async () => [{ title: "中文文章原題", url: "https://dev.to/codemee/article", published_at: "2026-11-04" }] };
@@ -205,22 +206,54 @@ test("each page load bypasses fresh release caches and the browser HTTP cache", 
     assert.equal(JSON.parse(ui.storage.get("codemee-release-feditor")).release.tag_name, "v9.0.0");
     const failed = await runMain(language, true, null, false, cached);
     assert.equal(failed.releaseState.requests, 1);
-    assert.equal(failed.links.exe.href, "previous-exe");
-    assert.match(failed.status.textContent, language === "en" ? /Unable to check/ : /暫時無法確認/);
+    assert.match(failed.links.exe.href, /v8\.0\.0/);
+    assert.match(failed.status.textContent, language === "en" ? /Unable to refresh/ : /暫時無法更新版本資料/);
+  }
+});
+
+test("all eight tools share one same-origin request and show the snapshot check time", async () => {
+  const data = JSON.parse(fs.readFileSync(path.join(root, 'releases.json'), 'utf8'));
+  const states = Object.entries(data.tools).map(([repo]) => {
+    const status = element(), windows = element({dataset: {extension: 'zip'}}), dmg = element();
+    return {status, windows, group: {dataset: {repo, tool: repo}, querySelector: selector => selector === '.download-status' ? status : selector.includes('windows') ? windows : dmg}};
+  });
+  const ui = await runMain('en', false, null, false, null, {data, groups: states.filter(item => item.group.dataset.repo !== 'feditor').map(item => item.group)});
+  assert.equal(ui.releaseState.requests, 1);
+  assert.equal(ui.releaseState.requestedUrl, 'releases.json');
+  assert.equal(ui.releaseState.requestOptions.cache, 'no-store');
+  for (const item of states.filter(item => item.group.dataset.repo !== 'feditor')) {
+    assert.match(item.windows.href, /^https:\/\/github.com\/codemee\//);
+    assert.match(item.status.textContent, /Last checked:/);
+  }
+});
+
+test("stale snapshots show their real check time and never pretend a page refresh checked GitHub", async () => {
+  const data = {schemaVersion: 1, tools: {feditor: {checkedAt: '2026-01-01T00:00:00Z', release: releases.feditor}}};
+  const ui = await runMain('zh-Hant', false, null, false, null, {data});
+  assert.match(ui.status.textContent, /版本確認時間：2026\/1\/1/);
+  assert.match(ui.status.textContent, /版本資料可能已過期/);
+  assert.match(ui.links.exe.href, /v0\.11\.0/);
+});
+
+test("malformed or missing snapshot entries keep the original download links", async () => {
+  for (const data of [{schemaVersion: 2, tools: {}}, {schemaVersion: 1, tools: {}}, {schemaVersion: 1, tools: {feditor: {checkedAt: 'invalid', release: releases.feditor}}}]) {
+    const ui = await runMain('en', false, null, false, null, {data});
+    assert.equal(ui.links.exe.href, 'previous-exe');
+    assert.match(ui.status.textContent, /Unable to refresh/);
   }
 });
 
 test("verified release assets select application ZIPs and retain FEditor EXE downloads", async () => {
   for (const language of ["en", "zh-Hant"]) {
-    for (const repo of ["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor", "mvapp"]) {
-      const ui = await runMain(language, false, null, false, null, { repo, release: releases[repo], windowsOnly: repo === "mvapp" });
+    for (const repo of ["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor", "mvapp", "tubetran"]) {
+      const ui = await runMain(language, false, null, false, null, { repo, release: releases[repo], windowsOnly: ["mvapp", "tubetran"].includes(repo) });
       const extension = repo === "feditor" || repo === "mvapp" ? "exe" : "zip";
-      assert.equal(ui.releaseState.requestedUrl, `https://api.github.com/repos/codemee/${repo}/releases/latest`);
+      assert.equal(ui.releaseState.requestedUrl, "releases.json");
       assert.ok(ui.links.exe.href.endsWith("." + extension));
       assert.doesNotMatch(ui.links.exe.href, /licenses|sha256/i);
       assert.equal(ui.links.exe.textContent, "↓ Windows ." + extension);
       assert.equal(ui.links.exe.dataset.extension, extension);
-      if (repo === "mvapp") assert.equal(ui.links.dmg, null);
+      if (["mvapp", "tubetran"].includes(repo)) assert.equal(ui.links.dmg, null);
       else assert.ok(ui.links.dmg.href.endsWith(".dmg"));
     }
   }
@@ -246,7 +279,7 @@ test("mvApp remains Windows-only and automatically follows future ZIP packaging"
   });
   assert.equal(ui.links.exe.href, "https://github.com/codemee/mvapp/releases/download/v2/mvapp.zip");
   assert.equal(ui.links.exe["aria-label"], "Download mvApp for Windows .zip");
-  assert.equal(ui.status.textContent, "Latest release v2");
+  assert.ok(ui.status.textContent.startsWith("Latest release v2"));
 });
 
 test("unexpected download hosts are rejected without replacing existing links", async () => {
@@ -255,7 +288,7 @@ test("unexpected download hosts are rejected without replacing existing links", 
     release: { tag_name: "v2", assets: [{ name: "mvapp.exe", browser_download_url: "https://example.com/mvapp.exe" }] }
   });
   assert.equal(ui.links.exe.href, "previous-exe");
-  assert.match(ui.status.textContent, /Unable to check/);
+  assert.match(ui.status.textContent, /Unable to refresh/);
 });
 
 test("GitHub repository names are case-insensitive while download URL spelling is preserved", async () => {
@@ -282,7 +315,7 @@ test("case-insensitive matching still rejects other owners, repositories, and no
       release: { tag_name: "v1", assets: [{ name: "mvapp.exe", browser_download_url: url }] }
     });
     assert.equal(ui.links.exe.href, "previous-exe");
-    assert.match(ui.status.textContent, /Unable to check/);
+    assert.match(ui.status.textContent, /Unable to refresh/);
   }
 });
 
@@ -295,7 +328,7 @@ test("release links update automatically every 15 minutes without reloading the 
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(ui.releaseState.requests, 2);
   assert.match(ui.links.exe.href, /v10\.0\.0/);
-  assert.equal(ui.status.textContent, "Latest release v10.0.0");
+  assert.ok(ui.status.textContent.startsWith("Latest release v10.0.0"));
 });
 
 test("hidden tabs skip polling, and returning to an expired page refreshes once", async () => {
@@ -327,14 +360,14 @@ test("automatic refresh avoids duplicate requests and recovers after a failed ch
   resume();
   await new Promise(resolve => setImmediate(resolve));
   assert.match(ui.links.exe.href, /v9\.0\.0/);
-  assert.match(ui.status.textContent, /暫時無法確認/);
+  assert.match(ui.status.textContent, /暫時無法更新版本資料/);
   ui.releaseState.offline = false;
   ui.releaseState.wait = null;
   ui.releaseState.tag = "v12.0.0";
   ui.intervals[0].callback();
   await new Promise(resolve => setImmediate(resolve));
   assert.match(ui.links.exe.href, /v12\.0\.0/);
-  assert.equal(ui.status.textContent, "最新版本 v12.0.0");
+  assert.ok(ui.status.textContent.startsWith("最新版本 v12.0.0"));
 });
 
 test("English dynamic UI covers theme, feeds, release updates, and missing platform downloads", async () => {
@@ -346,7 +379,7 @@ test("English dynamic UI covers theme, feeds, release updates, and missing platf
   assert.equal(ui.cards["dev-article"].status.textContent, "Latest article updated");
   assert.equal(ui.cards["blogger-article"].status.textContent, "Latest article updated");
   assert.equal(ui.cards["dev-article"].link.textContent, "中文文章原題 ↗");
-  assert.equal(ui.status.textContent, "Latest release v9.0.0");
+  assert.ok(ui.status.textContent.startsWith("Latest release v9.0.0"));
   assert.equal(ui.links.exe["aria-label"], "Download FEditor for Windows .exe");
   assert.equal(ui.links.dmg.textContent, "macOS .dmg not available");
   assert.equal(ui.links.dmg.href, undefined);
@@ -356,7 +389,7 @@ test("error messages use the page language and existing download links remain us
   for (const language of ["en", "zh-Hant"]) {
     const ui = await runMain(language, true);
     assert.equal(ui.links.exe.href, "previous-exe");
-    assert.match(ui.status.textContent, language === "en" ? /Unable to check/ : /暫時無法確認/);
+    assert.match(ui.status.textContent, language === "en" ? /Unable to refresh/ : /暫時無法更新版本資料/);
     assert.match(ui.cards["dev-article"].status.textContent, language === "en" ? /Unable to refresh/ : /暫時無法更新/);
     assert.equal(ui.themeSymbol.textContent, "◐");
   }
@@ -402,9 +435,9 @@ test("both static pages keep all tools, download URLs, images, and contact links
   const targets = html => [...html.matchAll(/(?:href|src)="([^"]+)"/g)].map(match => match[1]).sort();
   assert.deepEqual(targets(en), targets(zh));
   for (const html of [zh, en]) {
-    assert.equal((html.match(/class="tool"/g) || []).length, 7);
-    assert.equal((html.match(/class="tool-download"/g) || []).length, 13);
-    assert.equal((html.match(/data-format="windows"/g) || []).length, 7);
+    assert.equal((html.match(/class="tool"/g) || []).length, 8);
+    assert.equal((html.match(/class="tool-download"/g) || []).length, 14);
+    assert.equal((html.match(/data-format="windows"/g) || []).length, 8);
     assert.equal((html.match(/data-format="dmg"/g) || []).length, 6);
     const mvapp = html.match(/<div class="tool" id="mvapp">.*?<\/p>.*?<\/div><\/div><a class="tool-arrow"[^]*?<\/a><\/div>/)?.[0];
     assert.ok(mvapp);

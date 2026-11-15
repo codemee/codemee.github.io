@@ -1,0 +1,53 @@
+name: Update releases and deploy Pages
+
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test
+        run: node --test tests/*.test.cjs tests/*.test.mjs
+      - name: Update release snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASES_SOURCE_URL: https://codemee.github.io/releases.json
+        run: node scripts/update-releases.mjs
+      - name: Prepare static site
+        run: |
+          mkdir _site
+          git archive HEAD | tar -x -C _site
+          rm -rf _site/.github _site/scripts _site/tests
+          cp releases.json _site/releases.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

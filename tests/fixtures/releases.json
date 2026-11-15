@@ -181,5 +181,14 @@
         "browser_download_url": "https://github.com/codemee/mvApp/releases/download/v0.1.3/mvapp.exe"
       }
     ]
+  },
+  "tubetran": {
+    "tag_name": "v0.1.1",
+    "assets": [
+      {
+        "name": "TubeTran-v0.1.1-windows-x64.zip",
+        "browser_download_url": "https://github.com/codemee/tubetran/releases/download/v0.1.1/TubeTran-v0.1.1-windows-x64.zip"
+      }
+    ]
   }
 }

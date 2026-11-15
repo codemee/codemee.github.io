@@ -11,7 +11,9 @@
       notAvailable: "not available",
       unavailableDownload: (tool, tag, platform) => `${tool} ${tag}: ${platform} is not available`,
       latestVersion: tag => "Latest release " + tag,
-      releaseUnavailable: "Unable to check for updates. See release notes."
+      releaseUnavailable: "Unable to refresh version data. Keeping existing download links; see release notes.",
+      releaseChecked: date => " · Last checked: " + date,
+      releaseStale: " · Version data may be out of date"
     },
     zh: {
       system: "跟隨系統", light: "淺色", dark: "深色",
@@ -22,7 +24,9 @@
       notAvailable: "暫未提供",
       unavailableDownload: (tool, tag, platform) => `${tool} ${tag} 暫未提供 ${platform}`,
       latestVersion: tag => "最新版本 " + tag,
-      releaseUnavailable: "暫時無法確認最新版本，請查看版本說明"
+      releaseUnavailable: "暫時無法更新版本資料，保留既有下載連結，請查看版本說明",
+      releaseChecked: date => " · 版本確認時間：" + date,
+      releaseStale: " · 版本資料可能已過期"
     }
   };
   const text = messages[isEnglish ? "en" : "zh"];
@@ -132,7 +136,8 @@
   }
   // Versioned filenames change on each release; resolve the latest assets by format.
   const releaseRefreshInterval = 15 * 60 * 1000;
-  const pendingReleaseRequests = new WeakSet();
+  let pendingReleaseRequest = null;
+  let releasesLoadedAt = 0;
   function releaseDownloads(repo, release) {
     if (!release.tag_name || !Array.isArray(release.assets)) throw new Error("Invalid release");
     const downloads = { tag: release.tag_name };
@@ -185,45 +190,52 @@
     }
     group.querySelector(".download-status").textContent = text.latestVersion(downloads.tag);
   }
-  async function loadToolDownloads(group, force = false) {
-    const repo = group.dataset.repo;
-    if (!["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor", "mvapp"].includes(repo)) return;
-    if (pendingReleaseRequests.has(group)) return;
-    const cacheKey = "codemee-release-" + repo;
-    try {
-      const cached = JSON.parse(localStorage.getItem(cacheKey));
-      const age = Date.now() - cached?.checkedAt;
-      if (!force && age >= 0 && age < releaseRefreshInterval) {
-        renderDownloads(group, releaseDownloads(repo, cached.release));
-        return;
-      }
-    } catch { /* Storage and cache contents are optional. */ }
-    pendingReleaseRequests.add(group);
+  function applyReleaseEntry(group, entry) {
+    if (!entry || !Number.isFinite(Date.parse(entry.checkedAt))) throw new Error("Invalid release timestamp");
+    renderDownloads(group, releaseDownloads(group.dataset.repo, entry.release));
+    const checked = new Date(entry.checkedAt).toLocaleString(isEnglish ? "en-US" : "zh-TW");
+    const stale = Date.now() - Date.parse(entry.checkedAt) > 45 * 60 * 1000;
+    group.querySelector(".download-status").textContent += text.releaseChecked(checked) + (stale ? text.releaseStale : "");
+  }
+  async function refreshToolDownloads(force = false) {
+    if (document.hidden || pendingReleaseRequest) return pendingReleaseRequest;
+    if (!force && releasesLoadedAt && Date.now() - releasesLoadedAt < releaseRefreshInterval) return;
+    const groups = document.querySelectorAll(".tool-downloads");
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
-    try {
-      const response = await fetch(`https://api.github.com/repos/codemee/${repo}/releases/latest`, { signal: controller.signal, cache: "no-store" });
-      if (!response.ok) throw new Error("Release request failed");
-      const release = await response.json();
-      renderDownloads(group, releaseDownloads(repo, release));
+    pendingReleaseRequest = (async () => {
       try {
-        // Cache only the fields needed to resolve downloads, without credentials.
-        const snapshot = { tag_name: release.tag_name, assets: release.assets.map(({ name, browser_download_url }) => ({ name, browser_download_url })) };
-        localStorage.setItem(cacheKey, JSON.stringify({ checkedAt: Date.now(), release: snapshot }));
-      } catch { /* Downloads also work when browser storage is disabled. */ }
-    } catch {
-      group.querySelector(".download-status").textContent = text.releaseUnavailable;
-    } finally {
-      clearTimeout(timeout);
-      pendingReleaseRequests.delete(group);
-    }
+        // One same-origin request for all tools. Credentials stay in Actions.
+        const response = await fetch("releases.json", { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error("Release data request failed");
+        const data = await response.json();
+        if (data.schemaVersion !== 1 || !data.tools) throw new Error("Invalid release data");
+        groups.forEach(group => {
+          try {
+            const entry = data.tools[group.dataset.repo];
+            applyReleaseEntry(group, entry);
+            try { localStorage.setItem("codemee-release-" + group.dataset.repo, JSON.stringify(entry)); } catch { /* Optional cache. */ }
+          } catch {
+            group.querySelector(".download-status").textContent = text.releaseUnavailable;
+          }
+        });
+        releasesLoadedAt = Date.now();
+      } catch {
+        groups.forEach(group => {
+          group.querySelector(".download-status").textContent = text.releaseUnavailable;
+        });
+      } finally {
+        clearTimeout(timeout);
+        pendingReleaseRequest = null;
+      }
+    })();
+    return pendingReleaseRequest;
   }
-  function refreshToolDownloads(force = false) {
-    if (document.hidden) return;
-    document.querySelectorAll(".tool-downloads").forEach(group => loadToolDownloads(group, force));
-  }
-  // Every page load checks GitHub, even if a recent release is already cached.
-  document.querySelectorAll(".tool-downloads").forEach(group => loadToolDownloads(group, true));
+  // Restore known links immediately; still fetch the deployed snapshot on every load.
+  document.querySelectorAll(".tool-downloads").forEach(group => {
+    try { applyReleaseEntry(group, JSON.parse(localStorage.getItem("codemee-release-" + group.dataset.repo))); } catch { /* Static links remain usable. */ }
+  });
+  refreshToolDownloads(true);
   setInterval(() => refreshToolDownloads(true), releaseRefreshInterval);
   document.addEventListener("visibilitychange", () => refreshToolDownloads());
   window.addEventListener("focus", () => refreshToolDownloads());
