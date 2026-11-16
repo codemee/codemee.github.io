@@ -246,14 +246,14 @@ test("malformed or missing snapshot entries keep the original download links", a
 test("verified release assets select application ZIPs and retain FEditor EXE downloads", async () => {
   for (const language of ["en", "zh-Hant"]) {
     for (const repo of ["fshot", "repdf", "rgpdf", "picview", "prkit", "feditor", "mvapp", "tubetran"]) {
-      const ui = await runMain(language, false, null, false, null, { repo, release: releases[repo], windowsOnly: ["mvapp", "tubetran"].includes(repo) });
+      const ui = await runMain(language, false, null, false, null, { repo, release: releases[repo], windowsOnly: repo === "mvapp" });
       const extension = repo === "feditor" || repo === "mvapp" ? "exe" : "zip";
       assert.equal(ui.releaseState.requestedUrl, "releases.json");
       assert.ok(ui.links.exe.href.endsWith("." + extension));
       assert.doesNotMatch(ui.links.exe.href, /licenses|sha256/i);
       assert.equal(ui.links.exe.textContent, "↓ Windows ." + extension);
       assert.equal(ui.links.exe.dataset.extension, extension);
-      if (["mvapp", "tubetran"].includes(repo)) assert.equal(ui.links.dmg, null);
+      if (repo === "mvapp") assert.equal(ui.links.dmg, null);
       else assert.ok(ui.links.dmg.href.endsWith(".dmg"));
     }
   }
@@ -436,9 +436,9 @@ test("both static pages keep all tools, download URLs, images, and contact links
   assert.deepEqual(targets(en), targets(zh));
   for (const html of [zh, en]) {
     assert.equal((html.match(/class="tool"/g) || []).length, 8);
-    assert.equal((html.match(/class="tool-download"/g) || []).length, 14);
+    assert.equal((html.match(/class="tool-download"/g) || []).length, 15);
     assert.equal((html.match(/data-format="windows"/g) || []).length, 8);
-    assert.equal((html.match(/data-format="dmg"/g) || []).length, 6);
+    assert.equal((html.match(/data-format="dmg"/g) || []).length, 7);
     const mvapp = html.match(/<div class="tool" id="mvapp">.*?<\/p>.*?<\/div><\/div><a class="tool-arrow"[^]*?<\/a><\/div>/)?.[0];
     assert.ok(mvapp);
     assert.doesNotMatch(mvapp, /data-format="dmg"/);
