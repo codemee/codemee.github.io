@@ -6,7 +6,7 @@
 - picview.png：codemee/picview 的 src/picview/assets/picview-icon.png。
 - prkit.svg：codemee/prkit 的 src/prkit/icon.py 中 TRAY_ICON_SVG。
 - fshot.svg：依 codemee/fshot 的 src/fshot/icons.py 中 camera_icon 原始座標與顏色轉寫。
-- feditor.png：codemee/feditor 的 ui/assets/icon.png。
+- feditor.png：codemee/feditor 的 ui/assets/icon.png（2026-11-18 更新）。
 - tubetran.svg：codemee/tubetran 的 tubetran/static/logo/tubetran-light-icon.svg。
 - mvapp.png：codemee/mvapp 的 assets/icon.png。
 
